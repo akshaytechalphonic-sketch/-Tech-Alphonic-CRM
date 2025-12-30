@@ -221,7 +221,7 @@ option.inactive::before {
     <div class="main-content">
 
         <div class="d-flex justify-content-between align-items-center">
-            <h1>ashbord</h1>
+            <h1>Dashbord</h1>
             <form class="nav nav-pills" id="pills-tab" role="tablist">
                 <li class="nav-item me-2" role="presentation">
                     <select class="form-select rounded-pill text-capitalize" aria-label="Default select example"
