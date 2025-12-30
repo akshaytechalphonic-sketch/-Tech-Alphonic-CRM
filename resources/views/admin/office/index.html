@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form with Validation</title>
+    <style>
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+    </style>
+    <script>
+        function validateFullName() {
+            const fullName = document.getElementById("fullName").value;
+            const nameError = document.getElementById("nameError");
+            const nameRegex = /^[A-Za-z ]+$/;
+            if (!nameRegex.test(fullName)) {
+                nameError.textContent = "Full Name must contain only letters and spaces.";
+                return false;
+            } else {
+                nameError.textContent = "";
+                return true;
+            }
+        }
+
+        function validateEmail() {
+            const email = document.getElementById("email").value;
+            const emailError = document.getElementById("emailError");
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                emailError.textContent = "Please enter a valid email address.";
+                return false;
+            } else {
+                emailError.textContent = "";
+                return true;
+            }
+        }
+
+        function validatePhone() {
+            const phone = document.getElementById("phone").value;
+            const phoneError = document.getElementById("phoneError");
+            const phoneRegex = /^\+91[0-9]{10}$/;
+            if (!phoneRegex.test(phone)) {
+                phoneError.textContent = "Phone number must start with +91 and contain exactly 10 digits.";
+                return false;
+            } else {
+                phoneError.textContent = "";
+                return true;
+            }
+        }
+
+        function validateMessage() {
+            const message = document.getElementById("message").value;
+            const messageError = document.getElementById("messageError");
+            const wordCount = message.trim().split(/\s+/).length;
+            if (wordCount > 200) {
+                messageError.textContent = "Message must be 200 words or less. You have " + wordCount + " words.";
+                return false;
+            } else {
+                messageError.textContent = "";
+                return true;
+            }
+        }
+
+        function validateForm(event) {
+            const isNameValid = validateFullName();
+            const isEmailValid = validateEmail();
+            const isPhoneValid = validatePhone();
+            const isMessageValid = validateMessage();
+
+            if (isNameValid && isEmailValid && isPhoneValid && isMessageValid) {
+                alert("Form submitted successfully!");
+                return true;
+            } else {
+                alert("Please correct the errors in the form before submitting.");
+                return false;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("fullName").addEventListener("input", validateFullName);
+            document.getElementById("email").addEventListener("input", validateEmail);
+            document.getElementById("phone").addEventListener("input", validatePhone);
+            document.getElementById("message").addEventListener("input", validateMessage);
+        });
+    </script>
+</head>
+<body>
+    <h1>Contact Form</h1>
+    <form onsubmit="return validateForm(event)">
+        <label for="fullName">Full Name:</label><br>
+        <input type="text" id="fullName" name="fullName" required><br>
+        <span id="nameError" class="error"></span><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br>
+        <span id="emailError" class="error"></span><br>
+
+        <label for="phone">Phone:</label><br>
+        <input type="text" id="phone" name="phone" required><br>
+        <span id="phoneError" class="error"></span><br>
+
+        <label for="message">Message:</label><br>
+        <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
+        <span id="messageError" class="error"></span><br><br>
+
+        <button type="submit" id="submitButton">Submit</button>
+    </form>
+</body>
+</html>

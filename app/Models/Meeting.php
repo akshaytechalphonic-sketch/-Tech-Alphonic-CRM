@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Meeting extends Model
+{
+    use HasFactory;
+   
+
+    protected $fillable=[
+        'title',
+        'client_email',
+        'client_name',
+        'date',
+        'start_time',
+        'end_time',
+        'meet_link',
+        'senior_id',
+        'created_by',
+        'description',
+    ];
+
+
+    public function employee(){
+        return $this->belongsTo(OfficeEmployees::class,'senior_id','id');
+    }
+}
