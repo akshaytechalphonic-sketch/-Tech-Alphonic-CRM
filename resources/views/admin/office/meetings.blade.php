@@ -20,7 +20,7 @@
                                     <th><span class="d-none">All</span></th>
                                     <th>ID</th>
                                     <th>Title</th>
-                                    <th>clent name</th>
+                                    <th>Clent name</th>
                                     <th>Senior</th>
                                     <th>Date</th>
                                     <th>Time (IST)</th>

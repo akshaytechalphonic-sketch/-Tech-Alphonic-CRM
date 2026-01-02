@@ -1,80 +1,95 @@
 @extends('admin.partical.main')
 @push('title')
-<title>Dashboard | Admin</title>
+    <title>Dashboard | Admin</title>
 @endpush
 
 @push('custom-css')
-
 @endpush
 
 @section('content')
-
-        <div class="main-content">
-          <!-- write-body-content here start -->
-            <div class="pages-content">
-                <div class="dash-tabs d-flex justify-content-between  align-items-center mb-3 d-none">
-                    <ul class="nav nav-pills" id="pills-tab" role="tablist">
+    <div class="main-content">
+        <!-- write-body-content here start -->
+        <div class="pages-content">
+            <div class="dash-tabs d-flex justify-content-between  align-items-center mb-3 d-none">
+                <ul class="nav nav-pills" id="pills-tab" role="tablist">
                     <!-- <li class="nav-item me-3">
-                            <button class="client-main-btn" type="button" > Employee <img src="../assets/images/icons/double-arrow.png" alt=""> </button>
-                        </li> -->
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active rounded-pill" id="pills-Allclient-tab" data-bs-toggle="pill" data-bs-target="#pills-Allclient" type="button" role="tab" aria-controls="pills-Allclient" aria-selected="true">All Employees </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-pill" id="pills-Activeclient-tab" data-bs-toggle="pill" data-bs-target="#pills-Activeclient" type="button" role="tab" aria-controls="pills-Activeclient" aria-selected="false">Departments </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-pill" id="pills-InActiveclient-tab" data-bs-toggle="pill" data-bs-target="#pills-InActiveclient" type="button" role="tab" aria-controls="pills-InActiveclient" aria-selected="false">Designations </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-pill" id="pills-Completedclient-tab" data-bs-toggle="pill" data-bs-target="#pills-Completedclient" type="button" role="tab" aria-controls="pills-Completedclient" aria-selected="false">Employee Shift </button>
-                        </li>
-                    </ul>
+                                <button class="client-main-btn" type="button" > Employee <img src="../assets/images/icons/double-arrow.png" alt=""> </button>
+                            </li> -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill" id="pills-Allclient-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-Allclient" type="button" role="tab" aria-controls="pills-Allclient"
+                            aria-selected="true">All Employees </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill" id="pills-Activeclient-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-Activeclient" type="button" role="tab"
+                            aria-controls="pills-Activeclient" aria-selected="false">Departments </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill" id="pills-InActiveclient-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-InActiveclient" type="button" role="tab"
+                            aria-controls="pills-InActiveclient" aria-selected="false">Designations </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill" id="pills-Completedclient-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-Completedclient" type="button" role="tab"
+                            aria-controls="pills-Completedclient" aria-selected="false">Employee Shift </button>
+                    </li>
+                </ul>
 
-                    <div class="dash-tabs-filter  d-flex gap-3">
-                        <!-- <div class="filter-btn">
-                            <a href="#!" class="d-flex align-items-center gap-2"  data-bs-toggle="modal" data-bs-target="#filterModel"> <img src="../assets/images/icons/setting.png" alt="">Filter</a>
-                        </div> -->
-                        <div class="create-client-btn">
-                            <a href="{{route('admin.office.create')}}" class="d-flex align-items-center gap-2"> <img src="{{ asset('public/admin/assets/images/icons/plus.png')}}" alt="">Add Employee</a>
-                        </div>
-                        
+                <div class="dash-tabs-filter  d-flex gap-3">
+                    <!-- <div class="filter-btn">
+                                <a href="#!" class="d-flex align-items-center gap-2"  data-bs-toggle="modal" data-bs-target="#filterModel"> <img src="../assets/images/icons/setting.png" alt="">Filter</a>
+                            </div> -->
+                    <div class="create-client-btn">
+                        <a href="{{ route('admin.office.create') }}" class="d-flex align-items-center gap-2"> <img
+                                src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt="">Add
+                            Employee</a>
                     </div>
-                </div>
 
-                <div class="dash-tabs-content no-scrollbar">
-                    <div class="container-fluid py-4 px-5">
-                        <div class="row">
-                            <div class="col-md-12">
-                            
-                                <div class="step-form">
-                                    <div class="step-form-step active">
-                                        <form action="{{route('admin.office.update_employee',['id' => $office_employees->id])}}" method="post" enctype="multipart/form-data">
-                                            @csrf
-                                            <div class="row">
-                                                <div class="col-lg-12 mb-3">
-                                                    <div class="step-title ">
-                                                        <h3>Edit Employee</h3>
-                                                    </div>
+                </div>
+            </div>
+
+            <div class="dash-tabs-content no-scrollbar">
+                <div class="container-fluid py-4 px-5">
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <div class="step-form">
+                                <div class="step-form-step active">
+                                    <form
+                                        action="{{ route('admin.office.update_employee', ['id' => $office_employees->id]) }}"
+                                        method="post" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="row">
+                                            <div class="col-lg-12 mb-3">
+                                                <div class="step-title ">
+                                                    <h3>Edit Employee</h3>
                                                 </div>
-                                                {{-- <div class="col-lg-3 col-md-6 mb-3">
+                                            </div>
+                                            {{-- <div class="col-lg-3 col-md-6 mb-3">
                                                     <label for="" class="form-label">DOJ (Date of Joining) </label>
                                                     <input type="date" class="form-control" id=""  placeholder="DOJ" name="doj" value="{{$office_employees->doj}}" required>
                                                 </div> --}}
-                                                
-                                                <div class="col-lg-3 col-md-6 mb-3">
-                                                    <label for="" class="form-label">Name </label>
-                                                    <input type="text" class="form-control" id=""  placeholder="Name" name="name" value="{{$office_employees->name}}" required>
-                                                </div>
-                                                <div class="col-lg-3 col-md-6 mb-3">
-                                                    <label for="" class="form-label">Email </label>
-                                                    <input type="email" class="form-control" id=""  placeholder="Email" name="email" value="{{$office_employees->email}}" required>
-                                                </div>
-                                                <div class="col-lg-3 col-md-6 mb-3">
-                                                    <label for="" class="form-label">Mobile No </label>
-                                                    <input type="tel" class="form-control" id="" placeholder="Mobile No " name="mobile_no" value="{{$office_employees->mobile_no}}" required>
-                                                </div>
-                                                {{-- <div class="col-lg-3 col-md-6 mb-3">
+
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label for="" class="form-label">Name </label>
+                                                <input type="text" class="form-control" id="" placeholder="Name"
+                                                    name="name" value="{{ $office_employees->name }}" required>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label for="" class="form-label">Email </label>
+                                                <input type="email" class="form-control" id=""
+                                                    placeholder="Email" name="email"
+                                                    value="{{ $office_employees->email }}" required>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label for="" class="form-label">Mobile No </label>
+                                                <input type="tel" class="form-control" id=""
+                                                    placeholder="Mobile No " name="mobile_no"
+                                                    value="{{ $office_employees->mobile_no }}" required>
+                                            </div>
+                                            {{-- <div class="col-lg-3 col-md-6 mb-3">
                                                     <label for="" class="form-label">Total Year of Experience</label>
                                                     <input type="text" class="form-control" placeholder="Total Experience" name="total_exp" value="{{$office_employees->total_exp}}" required>
                                                 </div>
@@ -82,16 +97,33 @@
                                                     <label for="" class="form-label">DOB (Date of Birth) </label>
                                                     <input type="date" class="form-control" id=""  placeholder="DOB" name="dob" value="{{$office_employees->dob}}" required>
                                                 </div> --}}
-                                                <div class="col-lg-3 col-md-6 mb-3">
-                                                    <label for="" class="form-label">Select Gender</label>
-                                                    <select class="form-select" aria-label="Default select example" name="gender" required>
-                                                        <option value="" disabled> Choose Any One</option>
-                                                        <option value="Male" {{old('gender',$office_employees->gender ?? '')=='' ? 'selected': ''}}>Male</option>
-                                                        <option value="Female" {{old('gender',$office_employees->gender ?? '')=='' ? 'selected': ''}}>Female</option>
-                                                        <option value="Other" {{old('gender',$office_employees->gender ?? '')=='' ? 'selected': ''}}>Other</option>
-                                                    </select>
-                                                </div>
-                                                {{-- <div class="col-lg-3 col-md-6 mb-3">
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label class="form-label">Select Gender</label>
+
+                                                <select class="form-select" name="gender" required>
+                                                    <option value="" disabled
+                                                        {{ old('gender', $office_employees->gender ?? '') == '' ? 'selected' : '' }}>
+                                                        Choose Any One
+                                                    </option>
+
+                                                    <option value="Male"
+                                                        {{ old('gender', $office_employees->gender ?? '') == 'Male' ? 'selected' : '' }}>
+                                                        Male
+                                                    </option>
+
+                                                    <option value="Female"
+                                                        {{ old('gender', $office_employees->gender ?? '') == 'Female' ? 'selected' : '' }}>
+                                                        Female
+                                                    </option>
+
+                                                    <option value="Other"
+                                                        {{ old('gender', $office_employees->gender ?? '') == 'Other' ? 'selected' : '' }}>
+                                                        Other
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            {{-- <div class="col-lg-3 col-md-6 mb-3">
                                                     <label for="" class="form-label">Select Religion</label>
                                                     <select class="form-select" aria-label="Default select example" name="religion">
                                                         <option selected> Choose Any One</option>
@@ -139,29 +171,36 @@
                                                         </div>
                                                     </div>
                                                 </div> --}}
-                                                
-                                                <div class="col-lg-3 col-md-6 mb-3">
-                                                    <label for="" class="form-label">Select Designation  </label>
-                                                    <select class="form-select" aria-label="Default select example" name="designation_id" required>
-                                                        @foreach ($designations as $items)
-                                                            <option value="{{$items->id}}" {{$items->id == $office_employees->designation_id ? 'selected' : ''}} data-salesEmp="{{$items->department->department_name == 'Sales' ? 'true' : 'false'}}">{{$items->designation_name}}</option>
-                                                        @endforeach
-                                                        </select>
-                                                </div>
-                                                <div class="col-lg-3 col-md-6 mb-3" id=monthlySalesTarget>
-                                                    <label for="" class="form-label">Monthly Sales Target</label>
 
-                                                        <input type="number" name="monthly_sales_target" id="" class="form-control mt-2{{$office_employees->monthly_sales_target != null ? 'd-none' : ''}}" placeholder="Enter Monthly Sales Target" value="{{$office_employees->monthly_sales_target}}">
-                                                </div>
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label for="" class="form-label">Select Designation </label>
+                                                <select class="form-select" aria-label="Default select example"
+                                                    name="designation_id" required>
+                                                    @foreach ($designations as $items)
+                                                        <option value="{{ $items->id }}"
+                                                            {{ $items->id == $office_employees->designation_id ? 'selected' : '' }}
+                                                            data-salesEmp="{{ $items->department->department_name == 'Sales' ? 'true' : 'false' }}">
+                                                            {{ $items->designation_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 mb-3" id=monthlySalesTarget>
+                                                <label for="" class="form-label">Monthly Sales Target</label>
 
-                                                <div class="col-lg-3 col-md-6 mb-3">
-                                                <label for="" class="form-label">Password </label>
-                                                <input type="password" class="form-control" id=""
-                                                    placeholder="Password" name="password" >
-                                                    <small class="text-muted">Only fill to change password</small>
+                                                <input type="number" name="monthly_sales_target" id=""
+                                                    class="form-control mt-2{{ $office_employees->monthly_sales_target != null ? 'd-none' : '' }}"
+                                                    placeholder="Enter Monthly Sales Target"
+                                                    value="{{ $office_employees->monthly_sales_target }}">
                                             </div>
 
-                                                {{-- <div class="col-lg-3 col-md-6 mb-3">
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label for="" class="form-label">Password </label>
+                                                <input type="password" class="form-control" id=""
+                                                    placeholder="Password" name="password">
+                                                <small class="text-muted">Only fill to change password</small>
+                                            </div>
+
+                                            {{-- <div class="col-lg-3 col-md-6 mb-3">
                                                     <label for="" class="form-label">Aadhar no  </label>
                                                     <div class="file-def">
                                                         <input type="text" class="form-control" id="" placeholder="Aadhar no" name="aadhar_no" value="{{$office_employees->aadhar_no}}" required>
@@ -423,60 +462,55 @@
                                                         </div>
                                                     </div>
                                                 </div> --}}
-                                            </div>
-                                            <div class="next-preview-btns d-flex align-items-center justify-content-between mt-4">
-                                            <a href="{{route('admin.office.index')}}" class="prev-step">Cancel</a>        
+                                        </div>
+                                        <div
+                                            class="next-preview-btns d-flex align-items-center justify-content-between mt-4">
+                                            <a href="{{ route('admin.office.index') }}" class="prev-step">Cancel</a>
                                             <button class=" confirm-step" type="submit">Submit</button>
-                                            </div>
-                                        </form>
-                                    </div> 
-                                  
+                                        </div>
+                                    </form>
                                 </div>
+
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-            
-            
 
-
-          <!-- write-body-content here end -->
         </div>
-        
-      </div>
+
+
+
+
+        <!-- write-body-content here end -->
+    </div>
+
+    </div>
     </section>
 
     <div class="search-box-mob">
-      <div class="close-search-bar">
-        <img
-          width="30"
-          height="30"
-          src="https://img.icons8.com/ios/30/close-window.png"
-          alt="close-window"
-        />
-      </div>
+        <div class="close-search-bar">
+            <img width="30" height="30" src="https://img.icons8.com/ios/30/close-window.png"
+                alt="close-window" />
+        </div>
 
-      @push('custom-js')
-
-      <script>
-        $(document).ready(function() {
-            $('input[type=file]').change(function() {
-                let innersec = $(this).parent()[0];
-                $(innersec).find('span').removeClass('d-none')
-            })
-            $("select[name=designation_id]").change(function(){
-                const isSalesEmp = $(this).find(':selected').data('salesemp');
-                if(isSalesEmp == true){
-                    $('#monthlySalesTarget').removeClass('d-none')
-                    $('#monthlySalesTarget').val(null)
-                }else{
-                    $('#monthlySalesTarget').addClass('d-none')
-                }
-            })
-        })
-    </script>
-      @endpush
-      @endsection
-      
+        @push('custom-js')
+            <script>
+                $(document).ready(function() {
+                    $('input[type=file]').change(function() {
+                        let innersec = $(this).parent()[0];
+                        $(innersec).find('span').removeClass('d-none')
+                    })
+                    $("select[name=designation_id]").change(function() {
+                        const isSalesEmp = $(this).find(':selected').data('salesemp');
+                        if (isSalesEmp == true) {
+                            $('#monthlySalesTarget').removeClass('d-none')
+                            $('#monthlySalesTarget').val(null)
+                        } else {
+                            $('#monthlySalesTarget').addClass('d-none')
+                        }
+                    })
+                })
+            </script>
+        @endpush
+    @endsection
