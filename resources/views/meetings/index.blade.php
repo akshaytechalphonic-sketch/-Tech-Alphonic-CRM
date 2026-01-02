@@ -15,7 +15,7 @@
 
                 </div>
                 <div class="dash-tabs-filter  d-flex gap-3">
-                    
+
                 </div>
             </div>
 
@@ -27,96 +27,100 @@
 
                         <div class="table-responsive">
                             <table class="example row-border order-column nowrap">
-                              <thead class="thead-light">
-                                <tr>
-                                    <th></th> 
-                                    <th>#</th>
-                                    <th>Title</th>
-                                    <th>Senior</th>
-                                    <th>Date</th>
-                                    <th>Time (IST)</th>
-                                    <th>Meet link</th>
-                                    <th>Status</th>
-                                    <th>Remarks</th>
-                                    <th>Meet</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                                {{-- @forelse($meetings as $meeting) --}}
-                                @foreach($meetings as $meeting)
-
-                                    @php
-                                        $end = \Carbon\Carbon::parse(
-                                            $meeting->date . ' ' . $meeting->end_time,
-                                            'Asia/Kolkata',
-                                        );
-
-                                        $status = $end->isPast() ? 'completed' : 'upcoming';
-                                    @endphp
-
+                                <thead class="thead-light">
                                     <tr>
-                                        <td>
+                                        <th></th>
+                                        <th>#</th>
+                                        <th>Title</th>
+                                        <th>clent name</th>
+                                        <th>Senior</th>
+                                        <th>Date</th>
+                                        <th>Time (IST)</th>
+                                        <th>Meet link</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                        <th>Meet</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    {{-- @forelse($meetings as $meeting) --}}
+                                    @foreach ($meetings as $meeting)
+                                        @php
+                                            $end = \Carbon\Carbon::parse(
+                                                $meeting->date . ' ' . $meeting->end_time,
+                                                'Asia/Kolkata',
+                                            );
+
+                                            $status = $end->isPast() ? 'completed' : 'upcoming';
+                                        @endphp
+
+                                        <tr>
+                                            <td>
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox"
                                                         value="{{ $meeting->id }}">
                                                 </div>
                                             </td>
-                                        
-
-                                        <td>{{ $loop->iteration }}</td>
-
-                                        <td>{{ $meeting->title }}</td>
 
 
+                                            <td>{{ $loop->iteration }}</td>
 
-                                        <td>{{ $meeting->employee->name ?? 'N/A' }}</td>
+                                            <td>{{ $meeting->title }}</td>
 
-                                        <td>
-                                            {{ \Carbon\Carbon::parse($meeting->date)->format('d M Y') }}
-                                        </td>
-
-                                        <td>
-                                            {{ \Carbon\Carbon::parse($meeting->start_time)->format('h:i A') }}
-                                            -
-                                            {{ \Carbon\Carbon::parse($meeting->end_time)->format('h:i A') }}
-                                        </td>
-                                        <td>
-                                            @if ($meeting->meet_link)
-                                                <a href="{{ $meeting->meet_link }}" target="_blank">
-                                                    Open link
+                                            <td>
+                                                <a
+                                                    href="{{ route('office_employee.leads.single_lead', ['id' => $meeting->officelead->id]) }}">
+                                                    {{ $meeting->officelead->client_name }}
                                                 </a>
-                                            @else
-                                                <span class="text-muted">—</span>
-                                            @endif
-                                        </td>
+                                            </td>
 
-                                        <td>
-                                            <span
-                                                class="badge 
+                                            <td>{{ $meeting->employee->name ?? 'N/A' }}</td>
+
+                                            <td>
+                                                {{ \Carbon\Carbon::parse($meeting->date)->format('d M Y') }}
+                                            </td>
+
+                                            <td>
+                                                {{ \Carbon\Carbon::parse($meeting->start_time)->format('h:i A') }}
+                                                -
+                                                {{ \Carbon\Carbon::parse($meeting->end_time)->format('h:i A') }}
+                                            </td>
+                                            <td>
+                                                @if ($meeting->meet_link)
+                                                    <a href="{{ $meeting->meet_link }}" target="_blank">
+                                                        Open link
+                                                    </a>
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                <span
+                                                    class="badge 
                                                 {{ $status == 'upcoming' ? 'bg-success' : 'bg-secondary' }}">
-                                                {{ ucfirst($status) }}
-                                            </span>
-                                        </td>
-                                        <td> {{ $meeting->description ?? '' }}</td>
+                                                    {{ ucfirst($status) }}
+                                                </span>
+                                            </td>
+                                            <td> {{ $meeting->description ?? '' }}</td>
 
-                                        <td>
-                                            @if ($meeting->meet_link && $meeting->status == 'scheduled' && $status == 'upcoming')
-                                                <a href="{{ $meeting->meet_link }}" target="_blank"
-                                                    class="btn btn-sm btn-outline-primary">
-                                                    Join
-                                                </a>
-                                            @else
-                                                <span class="text-muted">—</span>
-                                            @endif
-                                        </td>
+                                            <td>
+                                                @if ($meeting->meet_link && $meeting->status == 'scheduled' && $status == 'upcoming')
+                                                    <a href="{{ $meeting->meet_link }}" target="_blank"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        Join
+                                                    </a>
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
 
 
-                                    </tr>
-
+                                        </tr>
                                     @endforeach
-                                
-                                {{-- @empty
+
+                                    {{-- @empty
                                     <tr>
                                         <td colspan="9" class="text-center text-muted">
                                             No meetings found
@@ -124,7 +128,7 @@
                                     </tr>
                                 @endforelse --}}
 
-                            </tbody>
+                                </tbody>
                             </table>
 
                         </div>
@@ -147,8 +151,7 @@
 
     <div class="search-box-mob">
         <div class="close-search-bar">
-            <img width="30" height="30" src="https://img.icons8.com/ios/30/close-window.png"
-                alt="close-window" />
+            <img width="30" height="30" src="https://img.icons8.com/ios/30/close-window.png" alt="close-window" />
         </div>
 
         <script>
@@ -178,5 +181,4 @@
                 tab.addEventListener('click', updateButtons);
             });
         </script>
-      
     @endsection

@@ -27,4 +27,10 @@ class Meeting extends Model
     public function employee(){
         return $this->belongsTo(OfficeEmployees::class,'senior_id','id');
     }
+
+    public function officelead()
+{
+    return $this->belongsTo(OfficeLeads::class, 'client_name', 'id');
+}
+
 }

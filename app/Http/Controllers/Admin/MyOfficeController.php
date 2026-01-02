@@ -28,7 +28,7 @@ class MyOfficeController extends Controller
     }
 
     public function meetinglist(){
-        $meetings=Meeting::with('employee')->orderBy('date', 'desc')->get();
+        $meetings=Meeting::with('employee','officelead')->orderBy('date', 'desc')->get();
         return view('admin.office.meetings',compact('meetings'));
     }
 

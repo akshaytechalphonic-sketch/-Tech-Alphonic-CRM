@@ -358,8 +358,8 @@
                             <select name="client_name" class="form-select" required>
                                 <option value="">-- Select Client --</option>
                                 @foreach ($clients as $client)
-                                    <option value="{{$client}}">
-                                        {{$client}}
+                                    <option value="{{$client->id}}">
+                                        {{$client->client_name}}
                                     </option>
                                 @endforeach
                             </select>

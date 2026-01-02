@@ -30,7 +30,7 @@ class MyOfficeLeadsEmployeeController extends Controller
             ->get();
         $lead_folders = OfficeLeadsFolders::all();
         $seniors = OfficeEmployees::get();
-        $clients=OfficeLeads::pluck('client_name');
+        $clients=OfficeLeads::get();
         
 
         return view('office.leads.leads', compact('leads', 'lead_folders', 'login_employee','seniors','clients'));
