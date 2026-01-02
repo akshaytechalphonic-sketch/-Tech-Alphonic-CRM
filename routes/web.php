@@ -44,7 +44,7 @@ use Illuminate\Support\Facades\Mail;
 */
 
 // Admin
-
+//sdklfjslkdfjsld
 Route::any('/', [LoginController::class, 'login'])->name('login');
 Route::any('/login', [LoginController::class, 'submit'])->name('admin.login');
 Route::any('/sign-up', [LoginController::class, 'signup'])->name('signup');
