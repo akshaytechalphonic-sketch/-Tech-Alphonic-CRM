@@ -37,13 +37,14 @@
 
             </div>
             <div class="dash-tabs-content no-scrollbar">
-                <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane fade show active" id="pills-Allclient" role="tabpanel"
+                        aria-labelledby="pills-Allclient-tab" tabindex="0">
+  
                     
                     
-                    <div class="table-responsive">
-                        
-                            <table class="table ">
-                                <thead>
+                        <div class="table-responsive">
+                            <table class="example row-border order-column nowrap">
+                                <thead class="thead-light">
                                 
                                     <tr>
                                         <th>SNo.</th>
