@@ -14,6 +14,7 @@ class LoginController extends Controller
 {
     public function login(Request $request)
     {
+      
         // Session::flush();
         return view('admin.login.login');
     }
