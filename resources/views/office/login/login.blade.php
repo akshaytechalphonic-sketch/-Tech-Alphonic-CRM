@@ -135,7 +135,7 @@
                                     <img src="{{ asset('public/admin/assets/images/tech-logo.svg') }}" alt="">
                                 </div>
                                 <div class="login-form-title mb-3 text-center">
-                                    <h2>Log In to Woorkroom</h2>
+                                    <h2>Log In to Workroom</h2>
                                 </div>
 
                                 <div class="dash-tabs d-flex justify-content-center align-items-center mb-4">

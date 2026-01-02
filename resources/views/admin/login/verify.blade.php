@@ -77,7 +77,7 @@
                     <div class="col-lg-6 col-md-6">
                         <div class="login-right  d-flex justify-content-center flex-column h-100">
                             <div class="login-form-title mb-3 text-left">
-                                <h2>Sign In to Woorkroom</h2>
+                                <h2>Sign In to Workroom</h2>
                             </div>
                             <form action="{{ route('verifyOtp') }}" method="post"> @csrf
                                 <div class="row">
