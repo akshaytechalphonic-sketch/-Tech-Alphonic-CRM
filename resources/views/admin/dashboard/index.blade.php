@@ -231,7 +231,7 @@ option.inactive::before {
                             <option value="{{ $items->id }}"
                                 {{ isset($_GET['employee']) ? ($_GET['employee'] == $items->id ? 'selected' : '') : '' }}>
                                  {{ $items->is_online == '1' ? '🟢' : '🔴' }} {{ $items->name }} -
-                                {{ preg_replace('/\..*$/', '', substr(strstr($items->email, '@'), 1)) }}</option>
+                                {{ $items->email}}</option>
                         @endforeach
                     </select>
                 </li>
