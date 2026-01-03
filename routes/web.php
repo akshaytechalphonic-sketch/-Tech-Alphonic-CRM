@@ -215,7 +215,7 @@ Route::middleware(['auth:admin'])->group(function () {
 //     });
 // });
 Route::middleware(['office_employee'])->group(function () {
-    Route::middleware('ip.restrict')->group(function () {
+    // Route::middleware('ip.restrict')->group(function () {
         Route::prefix('office-employee')->name('office_employee.')->group(function () {
             Route::any('/dashboard', [OfficeDashboardController::class, 'index'])->name('employee_dashboard');
 
@@ -250,7 +250,7 @@ Route::middleware(['office_employee'])->group(function () {
             });
             Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
         });
-    });
+    // });
 });
 
 Route::any('/employee', [OfficeLoginController::class, 'login'])->name('employee_login');
