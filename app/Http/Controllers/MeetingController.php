@@ -18,7 +18,7 @@ class MeetingController extends Controller
     public function index(Request $request)
     {
         $employee = auth('office_employees')->user();
-        $query = Meeting::with('employee','officelead')
+        $query = Meeting::with('employee', 'officelead')
             ->where(function ($q) use ($employee) {
                 $q->where('created_by', $employee->id)
                     ->orWhere('senior_id', $employee->id);
@@ -50,7 +50,7 @@ class MeetingController extends Controller
 
     public function scheduleMeeting(Request $request)
     {
-       
+
 
         $exists = Meeting::where('senior_id', $request->senior_id)
             ->where('date', $request->date)
@@ -83,25 +83,51 @@ class MeetingController extends Controller
         }
 
         $client = new Client();
-        
-        // dd(json_decode($employee->google_token, true));
-        $client->setAccessToken(json_decode($employee->google_token, true));
+        $client->setClientId(config('services.google.client_id'));
+        $client->setClientSecret(config('services.google.client_secret'));
         $client->setApplicationName('CRM Google Meet Scheduler');
+        $client->setAccessType('offline');
+
+        $client->setAccessToken(json_decode($employee->google_token, true));
+
+        // if ($client->isAccessTokenExpired()) {
+
+        //     $client->fetchAccessTokenWithRefreshToken(
+        //         $client->getRefreshToken()
+        //     );
+
+        //     $employee->update([
+        //         'google_token' => json_encode($client->getAccessToken())
+        //     ]);
+        // }
+
 
         if ($client->isAccessTokenExpired()) {
 
-            $client->fetchAccessTokenWithRefreshToken(
-                $client->getRefreshToken()
-            );
+            if ($client->getRefreshToken()) {
 
-            $employee->update([
-                'google_token' => json_encode($client->getAccessToken())
-            ]);
+                $newToken = $client->fetchAccessTokenWithRefreshToken(
+                    $client->getRefreshToken()
+                );
+
+                $employee->update([
+                    'google_token' => json_encode(array_merge(
+                        json_decode($employee->google_token, true),
+                        $newToken
+                    ))
+                ]);
+
+                $client->setAccessToken($employee->google_token);
+            } else {
+                return redirect('/office-employee/leads')
+                    ->with('error', 'Google account reconnect required');
+            }
         }
 
 
+
         $service = new Calendar($client);
-     
+
         $startDateTime = Carbon::createFromFormat(
             'Y-m-d H:i',
             $request->date . ' ' . $request->start_time,
@@ -128,7 +154,7 @@ class MeetingController extends Controller
             'description' => $request->description,
             'organizer' => [
                 'email' => $employee->email,
-                'displayName' => $employee->name, 
+                'displayName' => $employee->name,
             ],
             'start' => [
                 'dateTime' => $startDateTime->toRfc3339String(),
@@ -172,7 +198,7 @@ class MeetingController extends Controller
         Meeting::create([
             'title' => $request->title,
             'client_email' => $client_email,
-            'client_name'=>$request->client_name,
+            'client_name' => $request->client_name,
             'date' => $request->date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
