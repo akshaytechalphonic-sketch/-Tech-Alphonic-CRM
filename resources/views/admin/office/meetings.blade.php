@@ -51,10 +51,14 @@
                                         <td>{{ $meeting->title }}</td>
 
                                         <td>
+                                              @if (isset($meeting->officelead?->id))
                                             <a
                                                 href="{{ route('admin.leads.single_lead', ['id' => $meeting->officelead->id]) }}">
                                                 {{ $meeting->officelead->client_name }}
                                             </a>
+                                             @else
+                                                    <span>N/A</span>
+                                                @endif
                                         </td>
 
                                         <td>{{ $meeting->employee->name ?? 'N/A' }}</td>
