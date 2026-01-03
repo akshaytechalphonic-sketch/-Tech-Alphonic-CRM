@@ -41,12 +41,12 @@
                         aria-labelledby="pills-Allclient-tab" tabindex="0">
   
                     
-                    
                         <div class="table-responsive">
                             <table class="example row-border order-column nowrap">
                                 <thead class="thead-light">
                                 
                                     <tr>
+                                        <th></th>
                                         <th>SNo.</th>
                                         <th>Ip Address</th>
                                         <th>Created At</th>
@@ -56,24 +56,24 @@
                                 </thead>
                                 <tbody>
     
-                                    @forelse ($allowIp as $key=>$allowIp)
+                                   @forelse ($allowIp as $key => $ip)
                                 
                                         <tr>
-    
-                                            <td>{{ $key + 1 }}</td>
-                                            <td>{{ $allowIp->ip_address }}</td>
-                                            <td>{{ $allowIp->created_at }}</td>
+                                            <td></td>
+                                            <td>{{ $loop->iteration  }}</td>
+                                            <td>{{ $ip->ip_address }}</td>
+                                            <td>{{ $ip->created_at }}</td>
                                             <td>
                                                 <ul class="action-icons d-flex list-unstyled gap-2 mb-0">
                                                     <li>
                                                         <span class="iconify delete-icon" data-icon="iconoir:trash"
                                                             data-inline="false" style="font-size: 24px; cursor: pointer;"
-                                                            data-id="{{ $allowIp->id }}">
+                                                            data-id="{{ $ip->id }}">
                                                         </span>
                                                     </li>
                                                     <li>
                                                         <a href="javascript:void(0)" class="openEditModal"
-                                                            data-id="{{ $allowIp->id }}" data-ip="{{ $allowIp->ip_address }}"
+                                                            data-id="{{ $ip->id }}" data-ip="{{ $ip->ip_address }}"
                                                             data-bs-toggle="modal" data-bs-target="#editIpModal">
                                                             <span class="iconify" data-icon="basil:edit-outline"
                                                                 style="font-size: 24px; cursor:pointer;"></span>

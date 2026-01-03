@@ -49,11 +49,14 @@ class ArtisanTerminalController extends Controller
 
     public function offlineAll(Request $request)
     {
+
+        
         $today = Carbon::today()->format('Y-m-d');
+       
 
         // Check if cron already ran today
         $alreadyRun = OfficeEmployees::whereDate('cron_date', $today)->exists();
-
+       
         if ($alreadyRun) {
             return response()->json([
                 'status' => false,
