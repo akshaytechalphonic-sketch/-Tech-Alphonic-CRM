@@ -167,7 +167,7 @@
                 </div>
 
                 <div class="dash-tabs-filter multi-btns d-flex gap-3">
-                    <div class="create-client-btn active d-flex">
+                    {{-- <div class="create-client-btn active d-flex">
                         <a href="#!" class="d-flex align-items-center gap-2 me-2" data-bs-toggle="modal"
                             data-bs-target="#meetingsScheduleModal">
 
@@ -175,7 +175,7 @@
 
                             Schedule Meeting
                         </a>
-                    </div>
+                    </div> --}}
                     @auth('office_employees')
                         @php
                             $employee = auth('office_employees')->user();
@@ -189,10 +189,19 @@
                                 </a>
                             </div>
                         @else
-                            <div class="create-client-btn d-flex text-success align-items-center">
+                            {{-- <div class="create-client-btn d-flex text-success align-items-center">
                                 <i class="fa fa-check-circle me-2"></i>
                                 Google Calendar Connected
-                            </div>
+                            </div> --}}
+                            <div class="create-client-btn active d-flex">
+                        <a href="#!" class="d-flex align-items-center gap-2 me-2" data-bs-toggle="modal"
+                            data-bs-target="#meetingsScheduleModal">
+
+                            <img src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt="">
+
+                            Schedule Meeting
+                        </a>
+                    </div>
                         @endif
 
                   
