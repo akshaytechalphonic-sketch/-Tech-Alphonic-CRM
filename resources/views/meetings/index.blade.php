@@ -92,13 +92,15 @@
                                                 {{ \Carbon\Carbon::parse($meeting->end_time)->format('h:i A') }}
                                             </td>
                                             <td>
-                                                @if ($meeting->meet_link)
+                                                {{-- @if ($meeting->meet_link)
                                                     <a href="{{ $meeting->meet_link }}" target="_blank">
                                                         Open link
                                                     </a>
                                                 @else
                                                     <span class="text-muted">—</span>
-                                                @endif
+                                                @endif --}}
+                                        <td><input type="text" value="{{ $meeting->meet_link }} "></td>
+                                                
                                             </td>
 
                                             <td>
