@@ -69,10 +69,14 @@
                                             <td>{{ $meeting->title }}</td>
 
                                             <td>
-                                                <a
-                                                    href="{{ route('office_employee.leads.single_lead', ['id' => $meeting->officelead->id]) }}">
-                                                    {{ $meeting->officelead->client_name }}
-                                                </a>
+                                                @if (isset($meeting->officelead?->id))
+                                                    <a
+                                                        href="{{ route('office_employee.leads.single_lead', $meeting->officelead->id) }}">
+                                                        {{ $meeting->officelead->client_name }}
+                                                    </a>
+                                                @else
+                                                    <span>N/A</span>
+                                                @endif
                                             </td>
 
                                             <td>{{ $meeting->employee->name ?? 'N/A' }}</td>
