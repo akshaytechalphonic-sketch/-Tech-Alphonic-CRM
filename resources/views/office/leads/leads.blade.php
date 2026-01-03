@@ -355,7 +355,7 @@
                     </div>
                     <div class="mb-3">
                             <label class="form-label">Select Client</label>
-                            <select name="client_name" class="form-select" required>
+                            <select name="client_name" class="form-select" >
                                 <option value="">-- Select Client --</option>
                                 @foreach ($clients as $client)
                                     <option value="{{$client->id}}">
