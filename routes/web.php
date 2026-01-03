@@ -249,6 +249,8 @@ Route::middleware(['office_employee'])->group(function () {
                 Route::post('/task/update-status/{id}', 'updateStatus')->name('updateStatus');
             });
             Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+            Route::post('/meeting/cancel/{id}', [MeetingController::class, 'cancelMeeting'])->name('meetings.cancel');
+
         });
     // });
 });

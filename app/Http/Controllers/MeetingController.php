@@ -203,6 +203,7 @@ class MeetingController extends Controller
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
             'meet_link' => $event->getHangoutLink(),
+            'google_event_id' => $event->getId(),
             'senior_id' => $request->senior_id,
             'created_by' => $employee->id,
             'description' => $request->description ?? null
@@ -210,5 +211,74 @@ class MeetingController extends Controller
 
         return redirect('/office-employee/leads')->with('success', 'Meeting scheduled successfully')
             ->with('meet_link', $event->getHangoutLink());
+    }
+
+
+
+    public function cancelMeeting($meetingId)
+    {
+      
+        $meeting = Meeting::findOrFail($meetingId);
+       
+        $employee = auth('office_employees')->user();
+
+        if (!$employee || !$employee->google_token) {
+           
+            return back()->with('error', 'Google account not connected');
+        }
+    
+        if (!$meeting->google_event_id) {
+            return back()->with('error', 'Google event not found');
+        }
+        
+
+        // Google Client
+        $client = new Client();
+        $client->setClientId(config('services.google.client_id'));
+        $client->setClientSecret(config('services.google.client_secret'));
+        $client->setAccessType('offline');
+        $client->setAccessToken(json_decode($employee->google_token, true));
+
+        // Refresh token if expired
+        if ($client->isAccessTokenExpired()) {
+
+            if ($client->getRefreshToken()) {
+
+                $newToken = $client->fetchAccessTokenWithRefreshToken(
+                    $client->getRefreshToken()
+                );
+
+                $employee->update([
+                    'google_token' => json_encode(array_merge(
+                        json_decode($employee->google_token, true),
+                        $newToken
+                    ))
+                ]);
+
+                $client->setAccessToken(json_decode($employee->google_token, true));
+            } else {
+                return back()->with('error', 'Google account reconnect required');
+            }
+        }
+
+        // Calendar service
+        $service = new Calendar($client);
+
+        try {
+            $service->events->delete(
+                'primary',
+                $meeting->google_event_id,
+                ['sendUpdates' => 'all'] // 📧 email cancel notification
+            );
+        } catch (\Google\Service\Exception $e) {
+            return back()->with('error', 'Google Error: ' . $e->getMessage());
+        }
+
+        // Optional: update DB
+        $meeting->update([
+            'status' => 'cancelled'
+        ]);
+
+        return back()->with('success', 'Google meeting cancelled successfully');
     }
 }

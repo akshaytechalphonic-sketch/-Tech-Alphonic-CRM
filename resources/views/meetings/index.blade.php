@@ -40,6 +40,7 @@
                                         <th>Status</th>
                                         <th>Remarks</th>
                                         <th>Meet</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -101,11 +102,20 @@
                                             </td>
 
                                             <td>
-                                                <span
-                                                    class="badge 
-                                                {{ $status == 'upcoming' ? 'bg-success' : 'bg-secondary' }}">
-                                                    {{ ucfirst($status) }}
-                                                </span>
+                                                @if ($meeting->status === 'scheduled' && $status == 'completed')
+                                                    <span class="badge bg-primary">
+                                                        Completed
+                                                    </span>
+                                                @elseif ($meeting->status === 'cancelled')
+                                                    <span class="badge bg-danger">
+                                                        Cancelled
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success">
+                                                        {{ ucfirst($meeting->status) }}
+                                                    </span>
+                                                @endif
+
                                             </td>
                                             <td> {{ $meeting->description ?? '' }}</td>
 
@@ -119,7 +129,32 @@
                                                     <span class="text-muted">—</span>
                                                 @endif
                                             </td>
+                                            <td>
+                                                @if ($meeting->status === 'scheduled' && $status !== 'completed')
+                                                <ul class="action-icons d-flex list-unstyled gap-2 mb-0">
+                                                    <li>
+                                                        <i class="fas fa-calendar-times text-danger cancel-meeting-btn"
+                                                            style="font-size:22px; cursor:pointer;"
+                                                            data-id="{{ $meeting->id }}" title="Cancel Meeting"></i>
 
+                                                        <form id="cancel-form-{{ $meeting->id }}"
+                                                            action="{{ route('office_employee.meetings.cancel', $meeting->id) }}"
+                                                            method="POST" style="display:none;">
+                                                            @csrf
+                                                        </form>
+                                                    </li>
+                                                </ul>
+                                                @else
+
+                                               
+                                                @endif
+
+
+
+
+
+
+                                            </td>
 
                                         </tr>
                                     @endforeach
@@ -157,6 +192,30 @@
         <div class="close-search-bar">
             <img width="30" height="30" src="https://img.icons8.com/ios/30/close-window.png" alt="close-window" />
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+
+                document.body.addEventListener('click', function(e) {
+
+                    const btn = e.target.closest('.cancel-meeting-btn');
+                    if (!btn) return;
+
+                    if (!confirm('Are you sure you want to cancel this meeting?')) {
+                        return;
+                    }
+
+                    const meetingId = btn.getAttribute('data-id');
+                    const form = document.getElementById('cancel-form-' + meetingId);
+
+                    if (form) {
+                        form.submit();
+                    } else {
+                        console.error('Cancel form not found for meeting:', meetingId);
+                    }
+                });
+
+            });
+        </script>
 
         <script>
             const tabs = document.querySelectorAll('.nav-link');

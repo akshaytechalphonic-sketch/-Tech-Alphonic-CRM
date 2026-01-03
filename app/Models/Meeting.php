@@ -18,7 +18,9 @@ class Meeting extends Model
         'start_time',
         'end_time',
         'meet_link',
+        'google_event_id',
         'senior_id',
+        'status',
         'created_by',
         'description',
     ];
