@@ -99,7 +99,7 @@
                                                 @else
                                                     <span class="text-muted">—</span>
                                                 @endif --}}
-                                        <td><input type="text" value="{{ $meeting->meet_link }} "></td>
+                                        <input type="text" value="{{ $meeting->meet_link }} ">
                                                 
                                             </td>
 
