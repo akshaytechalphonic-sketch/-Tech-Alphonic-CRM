@@ -11,13 +11,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use App\Models\Meeting;
+use App\Models\Role;
+
 use Illuminate\Support\Facades\Hash;
+
 class MyOfficeController extends Controller
 {
 
     public function index()
     {
-     
+
         $departments = OfficeDepartments::withCount('employees')->get();
         $select_departments = OfficeDepartments::where('status', '1')->get();
         $designations = OfficeDesignations::withCount('employees')->with('department')->get();
@@ -27,9 +30,10 @@ class MyOfficeController extends Controller
         return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'teams'));
     }
 
-    public function meetinglist(){
-        $meetings=Meeting::with('employee','officelead')->orderBy('date', 'desc')->get();
-        return view('admin.office.meetings',compact('meetings'));
+    public function meetinglist()
+    {
+        $meetings = Meeting::with('employee', 'officelead')->orderBy('date', 'desc')->get();
+        return view('admin.office.meetings', compact('meetings'));
     }
 
     public function profile($id)
@@ -41,9 +45,9 @@ class MyOfficeController extends Controller
 
     public function create(Request $request)
     {
-
+        // dd($request);
         if (request()->isMethod('post')) {
-            
+
             $ip_file = null;
             if ($request->hasFile('ip_file')) {
                 $file = $request->file('ip_file');
@@ -154,7 +158,7 @@ class MyOfficeController extends Controller
             $OfficeEmployees->doj =  $request->input('doj');
             $OfficeEmployees->name =  $request->input('name');
             $OfficeEmployees->email  = $request->input('email');
-             $OfficeEmployees->gender  = $request->input('gender');
+            $OfficeEmployees->gender  = $request->input('gender');
             $OfficeEmployees->mobile_no     = $request->input('mobile_no');
             $OfficeEmployees->dob = $request->input('dob');
             $OfficeEmployees->religion = $request->input('religion');
@@ -206,16 +210,19 @@ class MyOfficeController extends Controller
             $OfficeEmployees->cvupload = $cvUpload;
             $OfficeEmployees->police_verification = $police_verification;
             $OfficeEmployees->other_document = $other_document;
-            
+
             $OfficeEmployees->monthly_casual_leave = $request->input('monthly_casual_leave');
             $OfficeEmployees->monthly_paid_leave = $request->input('monthly_paid_leave');
             $OfficeEmployees->monthly_sick_leave = $request->input('monthly_sick_leave');
             $OfficeEmployees->monthly_sales_target = $request->input('monthly_sales_target');
             $OfficeEmployees->other_leave = $request->input('other_leave');
+
+            $OfficeEmployees->role_id = $request->input('role_id');
+            $OfficeEmployees->manager_id = $request->input('manager_id');
             $OfficeEmployees->password = Hash::make($request->password);
 
             if ($request->input('shift') == 'Day') {
-                $OfficeEmployees->shift_json = json_encode([    
+                $OfficeEmployees->shift_json = json_encode([
                     'shift_type' => $request->input('shift'),
                     'start_time' => '09:00',
                     'end_time' => '19:00',
@@ -234,27 +241,39 @@ class MyOfficeController extends Controller
         }
         $departments = OfficeDepartments::where('status', '1')->get();
         $designations = OfficeDesignations::with('department')->where('status', '1')->get();
+        $managers = OfficeEmployees::whereIn('role_id', [1,2,4])->get();
+
+        $roles = Role::active()->get();
+
         // dd($designations);
-        return view('admin.office.create', compact('designations','departments'));
+        return view('admin.office.create', compact('designations', 'departments', 'roles', 'managers'));
     }
 
     public function edit_employee($id)
     {
+        $departments = OfficeDepartments::where('status', '1')->get();
         $designations = OfficeDesignations::where('status', '1')->get();
-        $office_employees = OfficeEmployees::find($id);
 
-        return view('admin.office.edit', compact('designations', 'office_employees'));
+        $office_employees = OfficeEmployees::with(['designation', 'designation.department'])->where('id', $id)->first();
+
+
+        $managers = OfficeEmployees::with('role')->whereIn('role_id', [1,2,4])->get();
+        // dd($managers);
+
+        $roles = Role::active()->get();
+
+        return view('admin.office.edit', compact('designations', 'office_employees', 'managers', 'roles', 'departments'));
     }
 
     public function update_employee(Request $request, $id)
     {
-        
+
 
         $OfficeEmployees = OfficeEmployees::find($id);
         $OfficeEmployees->doj =  $request->input('doj');
         $OfficeEmployees->name =  $request->input('name');
         $OfficeEmployees->email  = $request->input('email');
-          $OfficeEmployees->gender  = $request->input('gender');
+        $OfficeEmployees->gender  = $request->input('gender');
         $OfficeEmployees->mobile_no = $request->input('mobile_no');
         $OfficeEmployees->dob = $request->input('dob');
         $OfficeEmployees->religion = $request->input('religion');
@@ -288,15 +307,16 @@ class MyOfficeController extends Controller
         $OfficeEmployees->high_school_year = $request->input('high_school_year');
         $OfficeEmployees->graducation_year = $request->input('graducation_year');
         $OfficeEmployees->masters_year = $request->input('masters_year');
-
+        $OfficeEmployees->role_id = $request->input('role_id');
+        $OfficeEmployees->manager_id = $request->input('manager_id');
         $OfficeEmployees->monthly_casual_leave = $request->input('monthly_casual_leave');
         $OfficeEmployees->monthly_paid_leave = $request->input('monthly_paid_leave');
         $OfficeEmployees->monthly_sick_leave = $request->input('monthly_sick_leave');
         $OfficeEmployees->monthly_sales_target = $request->input('monthly_sales_target');
         $OfficeEmployees->other_leave = $request->input('other_leave');
-        if(isset($request->password)){
-        $OfficeEmployees->password = Hash::make($request->password);
-        }
+      if ($request->filled('password')) {
+    $OfficeEmployees->password = Hash::make($request->password);
+}
 
         $family_photo = null;
         if ($request->hasFile('family_photo')) {
@@ -419,20 +439,20 @@ class MyOfficeController extends Controller
             $OfficeEmployees->certificate = $certificate;
         }
         $other_document = null;
-            if ($request->hasFile('other_document')) {
-                $file = $request->file('other_document');
-                $image = str()->random(20) . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('admin/assets/office/other/'), $image);
-                $other_document = 'admin/assets/office/other/' . $image;
-                $OfficeEmployees->other_document = $other_document;
-            }
+        if ($request->hasFile('other_document')) {
+            $file = $request->file('other_document');
+            $image = str()->random(20) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('admin/assets/office/other/'), $image);
+            $other_document = 'admin/assets/office/other/' . $image;
+            $OfficeEmployees->other_document = $other_document;
+        }
         $OfficeEmployees->update();
         return redirect('admin/office')->with('success', 'Employee Updated Successfully!');
     }
 
     public function create_department(Request $request)
     {
-     
+
         $validated = $request->validate([
             'department_name' => 'required|unique:office_departments',
         ]);
@@ -482,16 +502,16 @@ class MyOfficeController extends Controller
 
     public function edit_department($id)
     {
-        
+
         $departments = OfficeDepartments::withCount('employees')->get();
         $select_departments = OfficeDepartments::where('status', '1')->get();
         $designations = OfficeDesignations::withCount('employees')->with('department')->get();
         $office_employees = OfficeEmployees::with(['designation', 'designation.department'])->get();
         $select_departments = OfficeDepartments::where('status', '1')->get();
         $editDepartment = OfficeDepartments::find($id);
-        
+
         $teams = OfficeTeams::all();
-        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'editDepartment','teams'));
+        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'editDepartment', 'teams'));
     }
 
     public function update_department(Request $request, $id)
@@ -506,12 +526,12 @@ class MyOfficeController extends Controller
     public function delete_department($id)
     {
         $isUsed = DB::table('office_designations')
-        ->where('department_id', $id)
-        ->exists();
-         if ($isUsed) {
-        return redirect('admin/office?tab=departments')
-            ->with('error', 'Department is assigned to a designation and cannot be deleted.');
-    }
+            ->where('department_id', $id)
+            ->exists();
+        if ($isUsed) {
+            return redirect('admin/office?tab=departments')
+                ->with('error', 'Department is assigned to a designation and cannot be deleted.');
+        }
         DB::table('office_departments')->where('id', $id)->delete();
         return redirect('admin/office?tab=departments')->with('success', 'Department Delete Successfully!');
     }
@@ -525,12 +545,12 @@ class MyOfficeController extends Controller
         $select_departments = OfficeDepartments::where('status', '1')->get();
         $editDesignation = OfficeDesignations::find($id);
         $teams = OfficeTeams::all();
-        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'editDesignation','teams'));
+        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'editDesignation', 'teams'));
     }
 
     public function update_designation(Request $request, $id)
     {
-      
+
         $editDes = OfficeDesignations::find($id);
         $editDes->designation_name = $request->designation_name;
         $editDes->department_id = $request->department_id;
@@ -576,7 +596,7 @@ class MyOfficeController extends Controller
         $status_employees = OfficeEmployees::find($statusId);
         // dd($status_employees);
         $teams = OfficeTeams::all();
-        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'status_employees','teams'));
+        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'status_employees', 'teams'));
     }
 
     public function employee_list($department_id, $designation_id = null)
@@ -622,7 +642,7 @@ class MyOfficeController extends Controller
         $shift_employees = OfficeEmployees::select('shift_json', 'id')->find($id);
         // dd($status_employees);
         $teams = OfficeTeams::all();
-        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'shift_employees','teams'));
+        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'shift_employees', 'teams'));
     }
 
     public function create_teams(Request $request)
@@ -642,7 +662,7 @@ class MyOfficeController extends Controller
         $create->delete();
         return redirect('admin/office?tab=teams')->with('success', 'Team Deleted Successfully!');
     }
-    
+
     public function edit_teams(Request $request, $id)
     {
         if (request()->isMethod('post')) {
@@ -661,6 +681,21 @@ class MyOfficeController extends Controller
         $teams = OfficeTeams::all();
         $editTeams = OfficeTeams::find($id);
 
-        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'teams','editTeams'));
+        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'teams', 'editTeams'));
+    }
+
+    public function getDesignations($departmentId)
+    {
+
+        return OfficeDesignations::where('department_id', $departmentId)
+            ->with('department')
+            ->get()
+            ->map(function ($d) {
+                return [
+                    'id' => $d->id,
+                    'designation_name' => $d->designation_name,
+                    'is_sales' => $d->department->department_name === 'Sales' ? 1 : 0
+                ];
+            });
     }
 }

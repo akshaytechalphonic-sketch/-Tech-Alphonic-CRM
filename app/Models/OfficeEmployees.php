@@ -109,4 +109,8 @@ class OfficeEmployees extends Authenticatable  // Extend Authenticatable
         return $this->hasMany(OfficeSecAttendances::class, 'emp_id', 'id');
     }
 
+    public function role(){
+        return $this->belongsTo(Role::class,'role_id','id');
+    }
+
 }

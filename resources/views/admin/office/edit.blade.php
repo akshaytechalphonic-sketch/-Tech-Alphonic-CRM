@@ -13,8 +13,8 @@
             <div class="dash-tabs d-flex justify-content-between  align-items-center mb-3 d-none">
                 <ul class="nav nav-pills" id="pills-tab" role="tablist">
                     <!-- <li class="nav-item me-3">
-                                <button class="client-main-btn" type="button" > Employee <img src="../assets/images/icons/double-arrow.png" alt=""> </button>
-                            </li> -->
+                                                                <button class="client-main-btn" type="button" > Employee <img src="../assets/images/icons/double-arrow.png" alt=""> </button>
+                                                            </li> -->
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active rounded-pill" id="pills-Allclient-tab" data-bs-toggle="pill"
                             data-bs-target="#pills-Allclient" type="button" role="tab" aria-controls="pills-Allclient"
@@ -39,8 +39,8 @@
 
                 <div class="dash-tabs-filter  d-flex gap-3">
                     <!-- <div class="filter-btn">
-                                <a href="#!" class="d-flex align-items-center gap-2"  data-bs-toggle="modal" data-bs-target="#filterModel"> <img src="../assets/images/icons/setting.png" alt="">Filter</a>
-                            </div> -->
+                                                                <a href="#!" class="d-flex align-items-center gap-2"  data-bs-toggle="modal" data-bs-target="#filterModel"> <img src="../assets/images/icons/setting.png" alt="">Filter</a>
+                                                            </div> -->
                     <div class="create-client-btn">
                         <a href="{{ route('admin.office.create') }}" class="d-flex align-items-center gap-2"> <img
                                 src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt="">Add
@@ -173,6 +173,32 @@
                                                 </div> --}}
 
                                             <div class="col-lg-3 col-md-6 mb-3">
+                                                <label class="form-label">Role</label>
+                                                <select name="role_id" id="role_id" class="form-select" required>
+                                                    <option value="">Select Role</option>
+                                                    @foreach ($roles as $role)
+                                                        <option value="{{ $role->id }}"
+                                                            {{ $office_employees->role_id == $role->id ? 'selected' : '' }}>
+                                                            {{ $role->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label class="form-label">Department</label>
+                                                <select id="department_id" class="form-select" required>
+                                                    <option value="">Select Department</option>
+                                                    @foreach ($departments as $dept)
+                                                        <option value="{{ $dept->id }}"
+                                                            {{ $office_employees->designation->department->id == $dept->id ? 'selected' : '' }}>
+                                                            {{ $dept->department_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+
+                                            {{-- <div class="col-lg-3 col-md-6 mb-3">
                                                 <label for="" class="form-label">Select Designation </label>
                                                 <select class="form-select" aria-label="Default select example"
                                                     name="designation_id" required>
@@ -183,7 +209,32 @@
                                                             {{ $items->designation_name }}</option>
                                                     @endforeach
                                                 </select>
+                                            </div> --}}
+
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label class="form-label">Designation</label>
+                                                <select name="designation_id" id="designation_id" class="form-select"
+                                                    required>
+                                                    <option value="">Select Designation</option>
+                                                </select>
                                             </div>
+
+                                            <div class="col-lg-3 col-md-6 mb-3 {{ in_array($office_employees->role_id, [3, 4]) ? '' : 'd-none' }}"
+                                                id="manager_box">
+                                                <label class="form-label">Reporting Manager</label>
+                                                <select name="manager_id" class="form-select">
+                                                    <option value="">Select Manager</option>
+
+                                                    @foreach ($managers as $manager)
+                                                        <option value="{{ $manager->id }}"
+                                                            {{ isset($office_employees) && $office_employees->manager_id == $manager->id ? 'selected' : '' }}>
+                                                            {{ $manager->name }} ({{ $manager->role->name }})
+                                                        </option>
+                                                    @endforeach
+
+                                                </select>
+                                            </div>
+
                                             <div class="col-lg-3 col-md-6 mb-3" id=monthlySalesTarget>
                                                 <label for="" class="form-label">Monthly Sales Target</label>
 
@@ -511,6 +562,162 @@
                         }
                     })
                 })
+            </script>
+            {{-- <script>
+                document.addEventListener('DOMContentLoaded', function() {
+
+                    const departmentSelect = document.getElementById('department_id');
+                    const designationSelect = document.getElementById('designation_id');
+
+                    // convert to integer to avoid type issue
+                    const selectedDesignation = Number("{{ $office_employees->designation_id ?? 0 }}");
+                  
+                    function loadDesignations(deptId) {
+
+                        if (!deptId) {
+                            designationSelect.innerHTML = '<option value="">Select Designation</option>';
+                            return;
+                        }
+
+                        designationSelect.innerHTML = '<option>Loading...</option>';
+
+                        fetch(`{{ url('admin/office/get-designations') }}/${deptId}`)
+                            .then(res => res.json())
+                            .then(data => {
+
+                                designationSelect.innerHTML = '<option value="">Select Designation</option>';
+
+                                data.forEach(item => {
+
+                                    const option = document.createElement('option');
+                                    option.value = item.id;
+                                    option.textContent = item.designation_name;
+
+                                    // 🔥 MATCH WITH EMPLOYEE.designation_id
+                                    if (item.id === selectedDesignation) {
+                                        option.selected = true;
+                                    }
+
+                                    designationSelect.appendChild(option);
+                                });
+                            })
+                            .catch(() => {
+                                designationSelect.innerHTML = '<option>Error loading</option>';
+                            });
+                    }
+
+                    // on department change
+                    departmentSelect.addEventListener('change', function() {
+                        loadDesignations(this.value);
+                    });
+
+                    // 🔥 AUTO LOAD ON EDIT PAGE
+                    if (departmentSelect.value) {
+                        loadDesignations(departmentSelect.value);
+                    }
+                });
+            </script> --}}
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+
+                    const departmentSelect = document.getElementById('department_id');
+                    const designationSelect = document.getElementById('designation_id');
+                    const monthlyTargetDiv = document.getElementById('monthlySalesTarget');
+
+                    // Edit page values
+                    const selectedDesignation = Number("{{ $office_employees->designation_id ?? 0 }}");
+
+                    function toggleMonthlyTarget() {
+                        const selectedOption = designationSelect.options[designationSelect.selectedIndex];
+                        const isSalesEmp = selectedOption?.getAttribute('data-salesemp');
+
+                        if (isSalesEmp === '1') {
+                            monthlyTargetDiv.classList.remove('d-none');
+                        } else {
+                            monthlyTargetDiv.classList.add('d-none');
+                        }
+                    }
+
+                    function loadDesignations(deptId) {
+
+                        if (!deptId) {
+                            designationSelect.innerHTML = '<option value="">Select Designation</option>';
+                            monthlyTargetDiv.classList.add('d-none');
+                            return;
+                        }
+
+                        designationSelect.innerHTML = '<option>Loading...</option>';
+
+                        fetch(`{{ url('admin/office/get-designations') }}/${deptId}`)
+                            .then(res => res.json())
+                            .then(data => {
+
+                                designationSelect.innerHTML = '<option value="">Select Designation</option>';
+
+                                data.forEach(item => {
+
+                                    const option = document.createElement('option');
+                                    option.value = item.id;
+                                    option.textContent = item.designation_name;
+
+                                    // 🔥 REQUIRED FOR SALES CHECK
+                                    option.setAttribute('data-salesemp', item.is_sales);
+
+                                    if (item.id === selectedDesignation) {
+                                        option.selected = true;
+                                    }
+
+                                    designationSelect.appendChild(option);
+                                });
+
+                                // 🔥 AUTO SHOW MONTHLY TARGET ON EDIT
+                                toggleMonthlyTarget();
+                            })
+                            .catch(() => {
+                                designationSelect.innerHTML = '<option>Error loading</option>';
+                            });
+                    }
+
+                    // Department change
+                    departmentSelect.addEventListener('change', function() {
+                        loadDesignations(this.value);
+                    });
+
+                    // Designation change
+                    designationSelect.addEventListener('change', toggleMonthlyTarget);
+
+                    // 🔥 AUTO LOAD FOR EDIT PAGE
+                    if (departmentSelect.value) {
+                        loadDesignations(departmentSelect.value);
+                    }
+                });
+            </script>
+
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+
+                    let roleSelect = document.getElementById('role_id');
+                    let managerBox = document.getElementById('manager_box');
+
+                    function toggleManager(roleId) {
+                        if (roleId == 3 || roleId == 4) {
+                            managerBox.classList.remove('d-none');
+                        } else {
+                            managerBox.classList.add('d-none');
+                        }
+                    }
+
+                    // on change
+                    roleSelect.addEventListener('change', function() {
+                        toggleManager(this.value);
+                    });
+
+                    // 🔥 AUTO CHECK ON EDIT
+                    if (roleSelect.value) {
+                        toggleManager(roleSelect.value);
+                    }
+                });
             </script>
         @endpush
     @endsection

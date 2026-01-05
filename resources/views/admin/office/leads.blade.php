@@ -151,7 +151,7 @@
                                         <option value="{{ $items->id }}"
                                             {{ isset($_GET['employee']) ? ($_GET['employee'] == $items->id ? 'selected' : '') : '' }}>
                                             {{ $items->name }} -
-                                            {{ preg_replace('/\..*$/', '', substr(strstr($items->email, '@'), 1)) }}
+                                            ({{$items->designation->designation_name}})
                                         </option>
                                     @endforeach
                                 </select>

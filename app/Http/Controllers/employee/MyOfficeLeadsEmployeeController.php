@@ -16,25 +16,108 @@ use Illuminate\Support\Str;
 
 class MyOfficeLeadsEmployeeController extends Controller
 {
-    public function index()
-    {
-      
-        $login_employee = Auth::guard('office_employees')->user();
+    // public function index()
+    // {
 
-        $leads = OfficeLeads::where('trash', false)
-            ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
-            ->when(isset($_GET['filter_by_lead']) && $_GET['filter_by_lead'] != null, fn($q) => $q->where('assign_date', $_GET['filter_by_lead']))
-            ->where('emp_id', $login_employee->id)
-            ->orderBy('id', 'DESC')
-            ->with('employee', 'integration')
-            ->get();
-        $lead_folders = OfficeLeadsFolders::all();
-        $seniors = OfficeEmployees::get();
-        $clients=OfficeLeads::get();
-        
+    //     $login_employee = Auth::guard('office_employees')->user();
 
-        return view('office.leads.leads', compact('leads', 'lead_folders', 'login_employee','seniors','clients'));
+    //     $leads = OfficeLeads::where('trash', false)
+    //         ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
+    //         ->when(isset($_GET['filter_by_lead']) && $_GET['filter_by_lead'] != null, fn($q) => $q->where('assign_date', $_GET['filter_by_lead']))
+    //         ->where('emp_id', $login_employee->id)
+    //         ->orderBy('id', 'DESC')
+    //         ->with('employee', 'integration')
+    //         ->get();
+    //     $lead_folders = OfficeLeadsFolders::all();
+    //     $seniors = OfficeEmployees::get();
+    //     $clients=OfficeLeads::get();
+
+
+    //     return view('office.leads.leads', compact('leads', 'lead_folders', 'login_employee','seniors','clients'));
+    // }
+
+public function index()
+{
+    $login_employee = Auth::guard('office_employees')->user();
+
+    $leads = OfficeLeads::where('trash', false)
+        ->with(['employee', 'integration'])
+        ->orderBy('id', 'DESC');
+
+    // =========================
+    // ROLE BASED VISIBILITY
+    // =========================
+
+    // ADMIN → ALL LEADS
+    if ($login_employee->role_id == 1) {
+        // no restriction
     }
+
+    // DEPARTMENT HEAD (role_id = 2) → WHOLE DEPARTMENT
+    elseif ($login_employee->role_id == 2) {
+
+        $deptId = $login_employee->designation->department_id;
+
+        $leads->whereHas('employee.designation', function ($q) use ($deptId) {
+            $q->where('department_id', $deptId);
+        });
+    }
+
+    // TEAM LEAD (role_id = 4) → OWN + JUNIORS
+    elseif ($login_employee->role_id == 4) {
+
+        $leads->where(function ($q) use ($login_employee) {
+            $q->where('emp_id', $login_employee->id)
+              ->orWhereHas('employee', function ($qq) use ($login_employee) {
+                  $qq->where('manager_id', $login_employee->id);
+              });
+        });
+    }
+
+    // EMPLOYEE (role_id = 3) → OWN ONLY
+    else {
+        $leads->where('emp_id', $login_employee->id);
+    }
+
+    // =========================
+    // FILTERS
+    // =========================
+
+    if (request('employee')) {
+        $leads->where('emp_id', request('employee'));
+    }
+
+    if (request('status')) {
+        $leads->where('status', request('status'));
+    }
+
+    if (request('filter_by_lead')) {
+        $leads->whereDate('assign_date', request('filter_by_lead'));
+    }
+
+    $leads = $leads->get();
+
+    // =========================
+    // EXTRA DATA
+    // =========================
+
+    $sales_emp = OfficeEmployees::whereHas('designation.department', function ($q) {
+        $q->where('department_name', 'Sales');
+    })->get();
+
+    // Seniors → Only Manager + Team Lead
+    $seniors = OfficeEmployees::whereIn('role_id', [2, 4])->get();
+
+    $lead_folders = OfficeLeadsFolders::all();
+    $clients = $leads;
+
+    return view(
+        'office.leads.leads',
+        compact('leads', 'lead_folders', 'login_employee', 'seniors', 'clients', 'sales_emp')
+    );
+}
+
+
 
     public function create_lead(Request $request)
     {
@@ -84,15 +167,69 @@ class MyOfficeLeadsEmployeeController extends Controller
 
         return redirect()->back()->with('success', 'Lead Added Successfully!');
     }
+    // public function single_lead($id)
+    // {
+
+    //     $login_employee = Auth::guard('office_employees')->user();
+    //     $lead = OfficeLeads::where('trash', false)->where('emp_id', $login_employee->id)->find($id);
+    //     $followups = OfficeLeadFollowups::where('lead_id', $id)->where('emp_id', $login_employee->id)->get();
+    //     // dd($lead);
+    //     return view('office.leads.single-lead', compact('lead', 'followups'));
+    // }
+
     public function single_lead($id)
     {
-        
         $login_employee = Auth::guard('office_employees')->user();
-        $lead = OfficeLeads::where('trash', false)->where('emp_id', $login_employee->id)->find($id);
-        $followups = OfficeLeadFollowups::where('lead_id', $id)->where('emp_id', $login_employee->id)->get();
-        // dd($lead);
+
+        $leadQuery = OfficeLeads::where('trash', false)
+            ->where('id', $id)
+            ->with(['employee', 'integration']);
+
+        // =========================
+        // ROLE BASED ACCESS
+        // =========================
+
+        // ADMIN → ALL
+        if ($login_employee->role_id == 1) {
+            $lead = $leadQuery->first();
+        }
+
+        // DEPARTMENT HEAD → DEPARTMENT LEAD
+        elseif ($login_employee->role_id == 2) {
+            $deptId = $login_employee->designation->department_id;
+
+            $lead = $leadQuery->whereHas('employee.designation', function ($q) use ($deptId) {
+                $q->where('department_id', $deptId);
+            })->first();
+        }
+
+        // MANAGER → TEAM + OWN LEAD
+        elseif ($login_employee->role_id == 3) {
+            $lead = $leadQuery->whereHas('employee', function ($q) use ($login_employee) {
+                $q->where('manager_id', $login_employee->id)
+                    ->orWhere('id', $login_employee->id);
+            })->first();
+        }
+
+        // EMPLOYEE → OWN LEAD
+        else {
+            $lead = $leadQuery->where('emp_id', $login_employee->id)->first();
+        }
+
+        // ❌ Unauthorized access
+        if (!$lead) {
+            abort(403, 'You are not authorized to view this lead.');
+        }
+
+        // =========================
+        // FOLLOWUPS (SAME VISIBILITY)
+        // =========================
+
+        $followups = OfficeLeadFollowups::where('lead_id', $lead->id)->get();
+
         return view('office.leads.single-lead', compact('lead', 'followups'));
     }
+
 
     public function update_lead_remark(Request $request, $id)
     {
@@ -160,7 +297,7 @@ class MyOfficeLeadsEmployeeController extends Controller
 
     public function single_folder($slug)
     {
-       
+
         $login_employee = Auth::guard('office_employees')->user();
         $single_folder = OfficeLeadsFolders::where('slug', $slug)->first();
         $lead_folders = OfficeLeadsFolders::all();

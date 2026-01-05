@@ -29,7 +29,7 @@ class MyOfficeLeadsController extends Controller
             ->orderBy('id', 'DESC')
             ->with('employee')
             ->get();
-         $seniors = OfficeEmployees::get();
+        $seniors = OfficeEmployees::get();
         $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
             $query->where('department_name', 'Sales');
         })->with(['designation', 'designation.department'])->get();

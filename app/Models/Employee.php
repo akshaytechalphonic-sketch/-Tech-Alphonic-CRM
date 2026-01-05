@@ -28,7 +28,9 @@ class Employee extends Model
         'designation_of_financial_approval',
         'profile_image',
         'cvupload',
-        'is_online'
+        'is_online',
+        'role_id',
+        'manager_id'
     ];
 
     public function getDesignationName() {

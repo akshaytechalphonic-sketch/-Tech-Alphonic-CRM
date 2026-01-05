@@ -17,8 +17,8 @@ Password : !T8v@kL#x3$Qn9W
             <div class="dash-tabs d-flex justify-content-between  align-items-center mb-3 d-none">
                 <ul class="nav nav-pills" id="pills-tab" role="tablist">
                     <!-- <li class="nav-item me-3">
-                                                                    <button class="client-main-btn" type="button" > Employee <img src="../assets/images/icons/double-arrow.png" alt=""> </button>
-                                                                </li> -->
+                                                                                                <button class="client-main-btn" type="button" > Employee <img src="../assets/images/icons/double-arrow.png" alt=""> </button>
+                                                                                            </li> -->
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active rounded-pill" id="pills-Allclient-tab" data-bs-toggle="pill"
                             data-bs-target="#pills-Allclient" type="button" role="tab" aria-controls="pills-Allclient"
@@ -43,8 +43,8 @@ Password : !T8v@kL#x3$Qn9W
 
                 <div class="dash-tabs-filter  d-flex gap-3">
                     <!-- <div class="filter-btn">
-                                                                    <a href="#!" class="d-flex align-items-center gap-2"  data-bs-toggle="modal" data-bs-target="#filterModel"> <img src="../assets/images/icons/setting.png" alt="">Filter</a>
-                                                                </div> -->
+                                                                                                <a href="#!" class="d-flex align-items-center gap-2"  data-bs-toggle="modal" data-bs-target="#filterModel"> <img src="../assets/images/icons/setting.png" alt="">Filter</a>
+                                                                                            </div> -->
                     <div class="create-client-btn">
                         <a href="{{ route('admin.office.create') }}" class="d-flex align-items-center gap-2"> <img
                                 src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt="">Add
@@ -88,7 +88,6 @@ Password : !T8v@kL#x3$Qn9W
                                                     oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);"
                                                     required>
 
-
                                             </div>
                                             <div class="col-lg-3 col-md-6 mb-3">
                                                 <label for="" class="form-label">Select Gender</label>
@@ -100,6 +99,28 @@ Password : !T8v@kL#x3$Qn9W
                                                     <option value="Other">Other</option>
                                                 </select>
                                             </div>
+                                            
+
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label class="form-label">Role</label>
+                                                <select name="role_id" id="role_id" class="form-select" required>
+                                                    <option value="">Select Role</option>
+                                                    @foreach ($roles as $role)
+                                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label class="form-label">Department</label>
+                                                <select id="department_id" class="form-select" required>
+                                                    <option value="">Select Department</option>
+                                                    @foreach ($departments as $dept)
+                                                        <option value="{{ $dept->id }}">{{ $dept->department_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
                                             {{-- <div class="col-lg-3 col-md-6 mb-3">
                                                 <label for="" class="form-label">DOB (Date of Birth) </label>
                                                 <input type="date" class="form-control" id=""
@@ -161,7 +182,7 @@ Password : !T8v@kL#x3$Qn9W
                                                     @endforelse
                                                 </select>
                                             </div> --}}
-                                            <div class="col-lg-3 col-md-6 mb-3">
+                                            {{-- <div class="col-lg-3 col-md-6 mb-3">
                                                 <label for="" class="form-label">Select Designation</label>
                                                 <select class="form-select" aria-label="Default select example"
                                                     name="designation_id" required>
@@ -174,10 +195,23 @@ Password : !T8v@kL#x3$Qn9W
                                                     @endforeach
                                                 </select>
 
-                                                {{-- <input type="number" name="monthly_sales_target" id="monthlySalesTarget"
-                                                    class="form-control mt-2 d-none"
-                                                    placeholder="Enter Monthly Sales Target"> --}}
+                                            </div> --}}
 
+                                            <div class="col-lg-3 col-md-6 mb-3">
+                                                <label class="form-label">Designation</label>
+                                                <select name="designation_id" id="designation_id" class="form-select"
+                                                    required>
+                                                    <option value="">Select Designation</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 mb-3 d-none" id="manager_box">
+                                                <label class="form-label">Reporting Manager</label>
+                                                <select name="manager_id" class="form-select">
+                                                    <option value="">Select Manager</option>
+                                                    @foreach ($managers as $manager)
+                                                        <option value="{{ $manager->id }}">{{ $manager->name }} ({{ $manager->role->name }})</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                             <div class="col-lg-3 col-md-6 mb-3 d-none" id='monthlySalesTarget'>
                                                 <label for="" class="form-label">Monthly Sales Target</label>
@@ -623,6 +657,7 @@ Password : !T8v@kL#x3$Qn9W
                     })
                     $("select[name=designation_id]").change(function() {
                         const isSalesEmp = $(this).find(':selected').data('salesemp');
+                      
                         if (isSalesEmp == true) {
                             $('#monthlySalesTarget').removeClass('d-none')
                             $('#monthlySalesTarget').val(null)
@@ -631,6 +666,44 @@ Password : !T8v@kL#x3$Qn9W
                         }
                     })
                 })
+            </script>
+            <script>
+                document.getElementById('role_id').addEventListener('change', function() {
+                    let managerBox = document.getElementById('manager_box');
+
+                    if (this.value == 3 || this.value == 4) {
+                        managerBox.classList.remove('d-none');
+                    } else {
+                        managerBox.classList.add('d-none');
+                    }
+                });
+            </script>
+            <script>
+                document.getElementById('department_id').addEventListener('change', function() {
+
+                    let deptId = this.value;
+                    let designation = document.getElementById('designation_id');
+
+                    designation.innerHTML = '<option>Loading...</option>';
+
+                    fetch(`{{ url('admin/office/get-designations') }}/${deptId}`)
+                        .then(res => res.json())
+                        .then(data => {
+
+                            designation.innerHTML = '<option value="">Select Designation</option>';
+
+                            data.forEach(item => {
+                                designation.innerHTML += `
+                    <option value="${item.id}" data-salesemp="${item.is_sales}">
+                        ${item.designation_name}
+                    </option>`;
+                            });
+                        })
+                        .catch(err => {
+                            designation.innerHTML = '<option>Error loading</option>';
+                            console.error(err);
+                        });
+                });
             </script>
         @endpush
     @endsection

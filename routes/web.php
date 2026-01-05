@@ -117,9 +117,11 @@ Route::middleware(['auth:admin'])->group(function () {
             Route::any('/change-employee-status/{statusId}', 'change_employee_status')->name('change_employee_status');
 
             Route::get('/meetings', 'meetinglist')->name('meetings');
-
+            Route::get('/get-designations/{department}', 'getDesignations')
+            ->name('get.designations');
+            
+           
             // End Employee Route
-
         });
         Route::prefix('projects')->name('projects.')->controller(ProjectController::class)->group(function () {
 
