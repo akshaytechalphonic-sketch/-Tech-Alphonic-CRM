@@ -299,7 +299,7 @@
                             </div>
                             <div class="col-lg-6 col-md-6 mb-3">
                                 <label for="" class="form-label">Client Mobile </label>
-                                <input type="text" class="form-control" id="" placeholder="987654321"
+                                <input type="text" class="form-control" id="" placeholder="9876543216"
                                     name="client_mobile" oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);" required >
                             </div>
 
@@ -332,7 +332,7 @@
                                     <option value="follow up">Follow Up</option>
                                     <option value="loss">Loss</option>
                                     <option value="not intrested">Not Intrested</option>
-                                    <option value="not connected">Not Converted</option>
+                                    <option value="not connected">Not Connected</option>
                                     <option value="converted">Converted</option>
                                 </select>
                             </div>

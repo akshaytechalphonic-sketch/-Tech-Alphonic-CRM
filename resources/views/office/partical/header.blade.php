@@ -103,6 +103,8 @@
                     <div class="logout-dropdown">
                         <a href="{{ route('employee_logout') }}">Logout <i class="fa fa-sign-out"
                                 aria-hidden="true"></i></a>
+                                {{-- <a href="{{ route('employee_logout') }}">Update Profile <i class="fa fa-sign-out"
+                                aria-hidden="true"></i></a> --}}
                     </div>
                 </div>
             </div>

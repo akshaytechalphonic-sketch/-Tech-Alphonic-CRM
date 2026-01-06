@@ -507,7 +507,7 @@
                                     <option value="follow up">Follow Up</option>
                                     <option value="loss">Loss</option>
                                     <option value="not intrested">Not Intrested</option>
-                                    <option value="not connected">Not Converted</option>
+                                    <option value="not connected">Not Connected</option>
                                     <option value="converted">Converted</option>
                                 </select>
                             </div>

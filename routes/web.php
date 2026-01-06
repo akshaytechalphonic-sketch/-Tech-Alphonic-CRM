@@ -30,6 +30,7 @@ use App\Models\OfficeLeadFollowups;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
+// use App\Http\Controllers\employee\EmployeeProfileController;
 
 
 /*
@@ -253,6 +254,11 @@ Route::middleware(['office_employee'])->group(function () {
             Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
             Route::post('/meeting/cancel/{id}', [MeetingController::class, 'cancelMeeting'])->name('meetings.cancel');
 
+            //  Route::prefix('profile')->name('employee.')->controller(EmployeeProfileController::class)->group(function () {
+            //     Route::get('/', 'employeProfile')->name('profile');
+            //     Route::any('/update/{id}', 'profileUpdate')->name('profile.update');
+                
+            // });
         });
     // });
 });
