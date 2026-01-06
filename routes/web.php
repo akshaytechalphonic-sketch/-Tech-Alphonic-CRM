@@ -30,7 +30,7 @@ use App\Models\OfficeLeadFollowups;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
-// use App\Http\Controllers\employee\EmployeeProfileController;
+use App\Http\Controllers\employee\EmployeeProfileController;
 
 
 /*
@@ -119,9 +119,9 @@ Route::middleware(['auth:admin'])->group(function () {
 
             Route::get('/meetings', 'meetinglist')->name('meetings');
             Route::get('/get-designations/{department}', 'getDesignations')
-            ->name('get.designations');
-            
-           
+                ->name('get.designations');
+
+
             // End Employee Route
         });
         Route::prefix('projects')->name('projects.')->controller(ProjectController::class)->group(function () {
@@ -198,6 +198,11 @@ Route::middleware(['auth:admin'])->group(function () {
             Route::get('/', 'index')->name('index');
         });
 
+         Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
+                Route::get('/', 'employeeProfile')->name('profile');
+                Route::put('/update', 'profileUpdate')->name('profile.update');
+            });
+
         Route::prefix('Ip-address')->name('ip.')->controller(AllowedIpController::class)->group(function () {
             Route::get('/', [AllowedIpController::class, 'index'])->name('index');
             Route::get('/create', [AllowedIpController::class, 'create'])->name('create');
@@ -219,47 +224,46 @@ Route::middleware(['auth:admin'])->group(function () {
 // });
 Route::middleware(['office_employee'])->group(function () {
     // Route::middleware('ip.restrict')->group(function () {
-        Route::prefix('office-employee')->name('office_employee.')->group(function () {
-            Route::any('/dashboard', [OfficeDashboardController::class, 'index'])->name('employee_dashboard');
+    Route::prefix('office-employee')->name('office_employee.')->group(function () {
+        Route::any('/dashboard', [OfficeDashboardController::class, 'index'])->name('employee_dashboard');
 
-            Route::prefix('leads')->name('leads.')->controller(MyOfficeLeadsEmployeeController::class)->group(function () {
-                Route::get('/', 'index')->name('index');
-                Route::post('/create-lead', 'create_lead')->name('create_lead');
-                Route::post('/update-lead-remark/{id}', 'update_lead_remark')->name('update_lead_remark');
-                Route::get('/lead/{id}', 'single_lead')->name('single_lead');
-                Route::post('/create-folder', 'create_folder')->name('create_folder');
-                Route::post('/edit-folder/{id}', 'edit_folder')->name('edit_folder');
-                Route::get('/folder/{slug}', 'single_folder')->name('single_folder');
-                Route::post('/upload-lead-csv/{folder_id}', 'upload_lead_csv')->name('upload_lead_csv');
-                Route::post('/change-lead-assign/{id}', 'change_lead_assign')->name('change_lead_assign');
-                Route::post('/assign-multiple-leads', 'assign_multiple_leads')->name('assign_multiple_leads');
-                Route::get('/delete-lead/{id}', 'delete_lead')->name('delete_lead');
-                Route::get('/trash/{id}', 'trash')->name('trash');
-                Route::post('/followup/{lead_id}', 'followup')->name('followup');
-            });
-            Route::prefix('chats')->name('chats.')->controller(MyOfficeChatsEmployeeController::class)->group(function () {
-                Route::get('/', 'index')->name('index');
-                Route::any('/{emp_base64}', 'singleChat')->name('singleChat');
-                // Route::post('/save', 'singleChat')->name('saveChat');
-            });
-
-            Route::prefix('task-management')->name('task_management.')->controller(MyOfficeTaskController::class)->group(function () {
-                Route::get('/', 'index')->name('index');
-                Route::post('/create/task', 'store')->name('store');
-                Route::post('/task/update/{id}', 'update')->name('update');
-                Route::post('/task/delete', 'delete')->name('delete');
-                Route::get('/view/{id}', 'view')->name('view');
-                Route::post('/task/update-status/{id}', 'updateStatus')->name('updateStatus');
-            });
-            Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
-            Route::post('/meeting/cancel/{id}', [MeetingController::class, 'cancelMeeting'])->name('meetings.cancel');
-
-            //  Route::prefix('profile')->name('employee.')->controller(EmployeeProfileController::class)->group(function () {
-            //     Route::get('/', 'employeProfile')->name('profile');
-            //     Route::any('/update/{id}', 'profileUpdate')->name('profile.update');
-                
-            // });
+        Route::prefix('leads')->name('leads.')->controller(MyOfficeLeadsEmployeeController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/create-lead', 'create_lead')->name('create_lead');
+            Route::post('/update-lead-remark/{id}', 'update_lead_remark')->name('update_lead_remark');
+            Route::get('/lead/{id}', 'single_lead')->name('single_lead');
+            Route::post('/create-folder', 'create_folder')->name('create_folder');
+            Route::post('/edit-folder/{id}', 'edit_folder')->name('edit_folder');
+            Route::get('/folder/{slug}', 'single_folder')->name('single_folder');
+            Route::post('/upload-lead-csv/{folder_id}', 'upload_lead_csv')->name('upload_lead_csv');
+            Route::post('/change-lead-assign/{id}', 'change_lead_assign')->name('change_lead_assign');
+            Route::post('/assign-multiple-leads', 'assign_multiple_leads')->name('assign_multiple_leads');
+            Route::get('/delete-lead/{id}', 'delete_lead')->name('delete_lead');
+            Route::get('/trash/{id}', 'trash')->name('trash');
+            Route::post('/followup/{lead_id}', 'followup')->name('followup');
         });
+        Route::prefix('chats')->name('chats.')->controller(MyOfficeChatsEmployeeController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::any('/{emp_base64}', 'singleChat')->name('singleChat');
+            // Route::post('/save', 'singleChat')->name('saveChat');
+        });
+
+        Route::prefix('task-management')->name('task_management.')->controller(MyOfficeTaskController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/create/task', 'store')->name('store');
+            Route::post('/task/update/{id}', 'update')->name('update');
+            Route::post('/task/delete', 'delete')->name('delete');
+            Route::get('/view/{id}', 'view')->name('view');
+            Route::post('/task/update-status/{id}', 'updateStatus')->name('updateStatus');
+        });
+        Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+        Route::post('/meeting/cancel/{id}', [MeetingController::class, 'cancelMeeting'])->name('meetings.cancel');
+
+        Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
+                Route::get('/', 'employeeProfile')->name('profile');
+                Route::put('/update', 'profileUpdate')->name('profile.update');
+            });
+    });
     // });
 });
 

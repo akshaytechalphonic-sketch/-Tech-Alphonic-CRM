@@ -92,21 +92,46 @@
                     </ul>
                 </div>
 
-                <div class="profile d-flex align-items-center gap-2">
-                    <div class="profile-img">
-                        <img src="{{ asset('public/admin/assets/images/user.png') }}" alt="" />
+                <div class="dropdown">
+
+                    <div class="profile d-flex align-items-center gap-2 dropdown-toggle" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+
+                        <div class="profile-img">
+                             @if(Auth::guard('office_employees')->user()->profile_image)
+
+                             <img src="{{ asset('public/uploads/profile/' . Auth::guard('office_employees')->user()->profile_image) }}" alt="" />
+                             @else
+                             <img src="{{ asset('public/admin/assets/images/user.png') }}" alt="" />
+
+                            @endif
+                        </div>
+
+                        <div class="user-info">
+                            <h4 class="title mb-0">{{ Auth::guard('office_employees')->user()->name }}</h4>
+                            <h5 class="user-name mb-0">{{ Auth::guard('office_employees')->user()->email }}</h5>
+                        </div>
+
                     </div>
-                    <div class="user-info">
-                        <h4 class="title">{{ Auth::guard('office_employees')->user()->name }}</h4>
-                        <h5 class="user-name">{{ Auth::guard('office_employees')->user()->email }}</h5>
-                    </div>
-                    <div class="logout-dropdown">
-                        <a href="{{ route('employee_logout') }}">Logout <i class="fa fa-sign-out"
-                                aria-hidden="true"></i></a>
-                                {{-- <a href="{{ route('employee_logout') }}">Update Profile <i class="fa fa-sign-out"
-                                aria-hidden="true"></i></a> --}}
-                    </div>
+
+                    {{-- DROPDOWN MENU --}}
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+
+                        <li>
+                            <a class="dropdown-item" href="{{ route('office_employee.profile') }}">
+                                <i class="fa fa-user me-2"></i> Update Profile
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{ route('employee_logout') }}">
+                                <i class="fa fa-sign-out me-2"></i> Logout
+                            </a>
+                        </li>
+
+                    </ul>
                 </div>
+
             </div>
         </div>
         <div class="mob-menu-layer"></div>
@@ -130,24 +155,24 @@
                         </li>
 
                         <li class="menu-item menu-dropdown">
-                            <a href="#!"
-                                class=""><img
+                            <a href="#!" class=""><img
                                     src="{{ asset('public/admin/assets/images/icons/icon2.png') }}" alt="" />
                                 <span class="item-name">My Office</span><img class="dropdown-icon"
                                     src="{{ asset('public/admin/assets/images/icons/arrow-right.png') }}"
                                     alt="" /></a>
-                            <div class="dropdown-menu-sidebar"   style="display: {{ Request::is('office-employee/leads') || Request::is('office-employee/chats') || Request::is('office-employee/meetings') || Request::is('office-employee/task-management*') ? 'block' : 'none' }};">
-                                
+                            <div class="dropdown-menu-sidebar"
+                                style="display: {{ Request::is('office-employee/leads') || Request::is('office-employee/chats') || Request::is('office-employee/meetings') || Request::is('office-employee/task-management*') ? 'block' : 'none' }};">
+
                                 <ul>
-                                    <li class="dropdown-item-sidebar" >
+                                    <li class="dropdown-item-sidebar">
                                         <a href="{{ route('office_employee.leads.index') }}"
                                             class="{{ Request::is('office-employee/leads') ? 'active' : '' }}"><img
                                                 src="{{ asset('public/admin/assets/images/icons/date-time.png') }}"
                                                 alt="" />
                                             <span class="item-name">Leads</span></a>
                                     </li>
-                                     <li class="dropdown-item-sidebar">
-                                        <a href="{{route('office_employee.meetings.index')}}"
+                                    <li class="dropdown-item-sidebar">
+                                        <a href="{{ route('office_employee.meetings.index') }}"
                                             class="{{ Request::is('office-employee/meetings') ? 'active' : '' }}">
                                             <img src="{{ asset('public/admin/assets/images/icons/salary.png') }}"
                                                 alt="">
@@ -159,17 +184,17 @@
                                             class="{{ Request::is('office-employee/chats') ? 'active' : '' }}"><img
                                                 src="{{ asset('public/admin/assets/images/icons/date-time.png') }}"
                                                 alt="" />
-                                            <span class="item-name">Messenger</span></a> 
+                                            <span class="item-name">Messenger</span></a>
                                     </li>
                                     <li class="dropdown-item-sidebar">
-                                        <a href="{{ route('office_employee.task_management.index')  }}"
+                                        <a href="{{ route('office_employee.task_management.index') }}"
                                             class="{{ Request::is('office-employee/task-management*') ? 'active' : '' }}">
                                             <img src="{{ asset('public/admin/assets/images/icons/salary.png') }}"
                                                 alt="">
                                             <span class="item-name">Task Management</span>
                                         </a>
                                     </li>
-                                   
+
                                     <li class="dropdown-item-sidebar d-none">
                                         <a href="#!"><img
                                                 src="{{ asset('public/admin/assets/images/icons/salary.png') }}"

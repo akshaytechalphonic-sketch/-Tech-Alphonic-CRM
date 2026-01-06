@@ -67,7 +67,7 @@
                 <!--        <div class="notification-indication">6</div>-->
                 <!--    </div>-->
                 <!--</a>-->
-                <div class="profile d-flex align-items-center gap-2">
+                {{-- <div class="profile d-flex align-items-center gap-2">
                     <div class="profile-img">
                         <img src="{{ asset('public/admin/assets/images/user.png') }}" alt="" />
                     </div>
@@ -79,6 +79,46 @@
                         <a href="{{ route('admin.logout') }}">Logout <i class="fa fa-sign-out"
                                 aria-hidden="true"></i></a>
                     </div>
+                </div> --}}
+
+                  <div class="dropdown">
+
+                    <div class="profile d-flex align-items-center gap-2 dropdown-toggle" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+
+                        <div class="profile-img">
+                             @if(Auth::guard('admin')->user()->profile_image)
+
+                             <img src="{{ asset('public/uploads/profile/' . Auth::guard('admin')->user()->profile_image) }}" alt="" />
+                             @else
+                             <img src="{{ asset('public/admin/assets/images/user.png') }}" alt="" />
+
+                            @endif
+                        </div>
+
+                        <div class="user-info">
+                            <h4 class="title mb-0">{{ Auth::guard('admin')->user()->name }}</h4>
+                            <h5 class="user-name mb-0">{{ Auth::guard('admin')->user()->email }}</h5>
+                        </div>
+
+                    </div>
+
+                    {{-- DROPDOWN MENU --}}
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.profile') }}">
+                                <i class="fa fa-user me-2"></i> Update Profile
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item text-danger" href="{{ route('employee_logout') }}">
+                                <i class="fa fa-sign-out me-2"></i> Logout
+                            </a>
+                        </li>
+
+                    </ul>
                 </div>
             </div>
         </div>
