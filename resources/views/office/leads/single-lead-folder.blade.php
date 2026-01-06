@@ -306,7 +306,7 @@
                             <div class="col-lg-6 col-md-6 mb-3">
                                 <label for="" class="form-label">Client Name </label>
                                 <input type="text" class="form-control" id="" placeholder="Client Name"
-                                    name="client_name" value="" required>
+                                    name="client_name" value="" >
                             </div>
 
                             <div class="col-lg-6 col-md-6 mb-3">
