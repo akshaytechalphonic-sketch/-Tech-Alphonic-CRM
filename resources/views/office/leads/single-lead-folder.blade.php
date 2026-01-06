@@ -134,6 +134,9 @@
                                 <option value="future"
                                     {{ isset($_GET['status']) ? ($_GET['status'] == 'future' ? 'selected' : '') : '' }}>Future
                                 </option>
+                                  <option value="follow up"
+                                    {{ isset($_GET['status']) ? ($_GET['status'] == 'follow up' ? 'selected' : '') : '' }}>Follow Up
+                                </option>
                                 <option value="loss"
                                     {{ isset($_GET['status']) ? ($_GET['status'] == 'loss' ? 'selected' : '') : '' }}>Loss
                                 </option>
@@ -142,6 +145,9 @@
                                 </option>
                                 <option value="not connected"
                                     {{ isset($_GET['status']) ? ($_GET['status'] == 'not connected' ? 'selected' : '') : '' }}>Not Connected
+                                </option>
+                                <option value="not intrested"
+                                    {{ isset($_GET['status']) ? ($_GET['status'] == 'not intrested' ? 'selected' : '') : '' }}>Not Intrested
                                 </option>
                                 <option value="converted"
                                     {{ isset($_GET['status']) ? ($_GET['status'] == 'converted' ? 'selected' : '') : '' }}>
@@ -323,7 +329,10 @@
                                     <option value="cold">Cold</option>
                                     <option value="fake">Fake</option>
                                     <option value="future">Future</option>
+                                    <option value="follow up">Follow Up</option>
                                     <option value="loss">Loss</option>
+                                    <option value="not intrested">Not Intrested</option>
+                                    <option value="not connected">Not Converted</option>
                                     <option value="converted">Converted</option>
                                 </select>
                             </div>

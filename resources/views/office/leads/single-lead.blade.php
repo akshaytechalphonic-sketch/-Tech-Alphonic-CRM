@@ -191,12 +191,17 @@
                                                     Fake</option>
                                                 <option value="future" {{ $lead->status == 'future' ? 'selected' : '' }}>
                                                     Future</option>
+                                                    <option value="follow up" {{ $lead->status == 'follow up' ? 'selected' : '' }}>
+                                                    Follow Up</option>
                                                 <option value="loss" {{ $lead->status == 'loss' ? 'selected' : '' }}>
                                                     Loss</option>
                                                 <option value="connected"
                                                     {{ $lead->status == 'connected' ? 'selected' : '' }}>Connected</option>
                                                 <option value="not connected"
                                                     {{ $lead->status == 'not connected' ? 'selected' : '' }}>Not Connected
+                                                </option>
+                                                 <option value="not intrested"
+                                                    {{ $lead->status == 'not intrested' ? 'selected' : '' }}>Not Intrested
                                                 </option>
                                                 <option value="converted"
                                                     {{ $lead->status == 'converted' ? 'selected' : '' }}>Converted</option>

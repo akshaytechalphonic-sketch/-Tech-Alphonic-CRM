@@ -424,7 +424,9 @@ option.inactive::before {
                                             'bg-primary-subtle text-primary-emphasis' => 'not connected',
                                             'bg-success-subtle text-success-emphasis' => 'cold',
                                             'bg-warning text-dark' => 'future',
+                                             'bg-warning text-light' => 'follow up',
                                             'bg-info text-dark' => 'loss',
+                                            'bg-success-subtle text-primary-emphasis' => 'not intrested',
                                         ];
                                     @endphp
                                     <h4>{{ number_format($all_leads->count()) }}</h4>
