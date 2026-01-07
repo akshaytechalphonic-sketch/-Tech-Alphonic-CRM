@@ -151,7 +151,7 @@
                                         <option value="{{ $items->id }}"
                                             {{ isset($_GET['employee']) ? ($_GET['employee'] == $items->id ? 'selected' : '') : '' }}>
                                             {{ $items->name }} -
-                                            ({{$items->designation->designation_name}})
+                                            ({{ $items->designation->designation_name }})
                                         </option>
                                     @endforeach
                                 </select>
@@ -241,6 +241,7 @@
                                         <th>Service Name</th>
                                         <th>Client Name</th>
                                         <th>Client Phone</th>
+                                        <th>WhatsApp</th>
                                         <th>Client Email</th>
                                         <th>Price</th>
                                         <th>Latest Remark</th>
@@ -263,6 +264,13 @@
                                             <td>{{ $lead->service_name }}</td>
                                             <td>{{ $lead->client_name }}</td>
                                             <td>{{ $lead->client_mobile }}</td>
+                                            <td class="text-center">
+                                                <a href="https://wa.me/91{{ preg_replace('/\D/', '', $lead->client_mobile) }}"
+                                                    target="_blank" title="Chat on WhatsApp">
+                                                    <i class="fa-brands fa-whatsapp"
+                                                        style="color:#25D366; font-size:22px;"></i>
+                                                </a>
+                                            </td>
                                             <td>{{ $lead->client_email }}</td>
                                             <td>{{ number_format($lead->amount) }}</td>
                                             <td>

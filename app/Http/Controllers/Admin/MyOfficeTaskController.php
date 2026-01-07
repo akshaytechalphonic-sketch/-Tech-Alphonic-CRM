@@ -48,11 +48,7 @@ class MyOfficeTaskController extends Controller
         // Base query
         $tasks = OfficeTask::with(['department', 'assignee', 'reporter']);
 
-        /**
-         * ============================
-         * ADMIN SECTION
-         * ============================
-         */
+
         if (auth('admin')->check()) {
 
             // Filters for Admin
@@ -117,6 +113,25 @@ class MyOfficeTaskController extends Controller
     }
 
 
+    public function departmentEmployee($departmentId)
+    {
+        return OfficeEmployees::whereHas('designation', function ($q) use ($departmentId) {
+            $q->where('department_id', $departmentId);
+        })
+            ->with(['designation.department'])
+            ->get()
+            ->map(function ($emp) {
+                return [
+                    'id'               => $emp->id,
+                    'name'             => $emp->name,
+                    'email'            => $emp->email,
+                    'designation_id'   => $emp->designation_id,
+                    'designation_name' => $emp->designation->designation_name ?? null,
+                    'department_name'  => $emp->designation->department->department_name ?? null,
+                    'is_sales'         => ($emp->designation->department->department_name ?? '') === 'Sales' ? 1 : 0,
+                ];
+            });
+    }
 
 
 
@@ -125,7 +140,7 @@ class MyOfficeTaskController extends Controller
     {
 
         $request->validate([
-           'project_id' => 'required',
+            'project_id' => 'required',
             'title' => 'required|string|max:255',
             'department_id' => 'required|exists:office_departments,id',
             'assigned_to' => 'required|exists:office_employees,id',

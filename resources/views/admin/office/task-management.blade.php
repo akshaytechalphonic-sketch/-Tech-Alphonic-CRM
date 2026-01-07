@@ -167,27 +167,27 @@
                                             @endphp
                                             </td>
                                             <td>
-                                                   @php
-                                        if ($task->review_at) {
-                                            $review = \Carbon\Carbon::parse($task->review_at);
+                                                @php
+                                                    if ($task->review_at) {
+                                                        $review = \Carbon\Carbon::parse($task->review_at);
 
-                                            // completed_at हो तो वही, नहीं है तो now()
-                                            $end = $task->completed_at
-                                                ? \Carbon\Carbon::parse($task->completed_at)
-                                                : \Carbon\Carbon::now();
+                                                        // completed_at हो तो वही, नहीं है तो now()
+                                                        $end = $task->completed_at
+                                                            ? \Carbon\Carbon::parse($task->completed_at)
+                                                            : \Carbon\Carbon::now();
 
-                                            // अगर end गलत future date हो तो रोक दो
-                                            if ($end < $review) {
-                                                echo 'Invalid Time';
-                                            } else {
-                                                $diff = $review->diff($end);
+                                                        // अगर end गलत future date हो तो रोक दो
+                                                        if ($end < $review) {
+                                                            echo 'Invalid Time';
+                                                        } else {
+                                                            $diff = $review->diff($end);
 
-                                                echo $diff->days . 'd ' . $diff->h . 'h ' . $diff->i . 'm';
-                                            }
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                    @endphp
+                                                            echo $diff->days . 'd ' . $diff->h . 'h ' . $diff->i . 'm';
+                                                        }
+                                                    } else {
+                                                        echo 'N/A';
+                                                    }
+                                                @endphp
                                             </td>
                                             <td>{{ $task->task_type ?? '—' }}</td>
                                             <td>
@@ -294,8 +294,8 @@
                         </div> --}}
                             <div class="col-lg-6 col-md-6 mb-3">
                                 <label for="" class="form-label">Departments</label>
-                                <select class="form-select" aria-label="Default select example" name="department_id"
-                                    required>
+                                <select class="form-select" aria-label="Default select example" id="department_id"
+                                    name="department_id" required>
                                     <option value="" selected disabled> Select Department</option>
                                     @foreach ($department as $item)
                                         <option value="{{ $item->id }}">{{ $item->department_name }}</option>
@@ -305,13 +305,18 @@
                             </div>
                             <div class="col-lg-6 col-md-6 mb-3">
                                 <label for="" class="form-label">Assign Employee</label>
-                                <select class="form-select " aria-label="Default select example" name="assigned_to"
+                                {{-- <select class="form-select " aria-label="Default select example" name="assigned_to"
                                     required>
                                     <option value="" disabled selected=""> Select Employee</option>
                                     @foreach ($employee as $item)
                                         <option value="{{ $item->id }}">{{ $item->name }}</option>
                                     @endforeach
+                                </select> --}}
+
+                                <select id="employee_id" name="employee_id" class="form-select">
+                                    <option value="">Select Employee</option>
                                 </select>
+
                             </div>
                             <div class="col-lg-6 col-md-6 mb-3">
                                 <label for="" class="form-label">Reporter </label>
@@ -508,6 +513,45 @@
                             new bootstrap.Modal(document.getElementById('editTaskModal')).show();
                         });
                     });
+                });
+            </script>
+
+            <script>
+                document.getElementById('department_id').addEventListener('change', function() {
+
+                    let deptId = this.value;
+                    let employeeSelect = document.getElementById('employee_id');
+
+                    if (!deptId) {
+                        employeeSelect.innerHTML = '<option value="">Select Employee</option>';
+                        return;
+                    }
+
+                    employeeSelect.innerHTML = '<option>Loading...</option>';
+
+                    fetch(`{{ url('admin/office-task-management/get-employee') }}/${deptId}`)
+                        .then(res => res.json())
+                        .then(data => {
+
+                            employeeSelect.innerHTML = '<option value="">Select Employee</option>';
+
+                            if (data.length === 0) {
+                                employeeSelect.innerHTML = '<option value="">No Employees Found</option>';
+                                return;
+                            }
+
+                            data.forEach(emp => {
+                                employeeSelect.innerHTML += `
+                    <option value="${emp.id}" data-salesemp="${emp.is_sales}">
+                        ${emp.name} (${emp.designation_name})
+                    </option>
+                `;
+                            });
+                        })
+                        .catch(err => {
+                            employeeSelect.innerHTML = '<option>Error loading employees</option>';
+                            console.error(err);
+                        });
                 });
             </script>
         @endpush

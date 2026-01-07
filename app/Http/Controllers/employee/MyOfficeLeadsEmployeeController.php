@@ -36,86 +36,82 @@ class MyOfficeLeadsEmployeeController extends Controller
     //     return view('office.leads.leads', compact('leads', 'lead_folders', 'login_employee','seniors','clients'));
     // }
 
-public function index()
-{
-    $login_employee = Auth::guard('office_employees')->user();
+    public function index()
+    {
+        $login_employee = Auth::guard('office_employees')->user();
 
-    $leads = OfficeLeads::where('trash', false)
-        ->with(['employee', 'integration'])
-        ->orderBy('id', 'DESC');
+        $leads = OfficeLeads::where('trash', false)
+            ->with(['employee', 'integration'])
+            ->orderBy('id', 'DESC');
 
-    // =========================
-    // ROLE BASED VISIBILITY
-    // =========================
+        // ADMIN → ALL LEADS
+        if ($login_employee->role_id == 1) {
+            // no restriction
+        }
 
-    // ADMIN → ALL LEADS
-    if ($login_employee->role_id == 1) {
-        // no restriction
+        // DEPARTMENT HEAD (role_id = 2) → WHOLE DEPARTMENT
+        elseif ($login_employee->role_id == 2) {
+
+            $deptId = $login_employee->designation->department_id;
+
+            $leads->whereHas('employee.designation', function ($q) use ($deptId) {
+                $q->where('department_id', $deptId);
+            });
+        }
+
+        // TEAM LEAD (role_id = 4) → OWN + JUNIORS
+        elseif ($login_employee->role_id == 4) {
+
+            $leads->where(function ($q) use ($login_employee) {
+                $q->where('emp_id', $login_employee->id)
+                    ->orWhereHas('employee', function ($qq) use ($login_employee) {
+                        $qq->where('manager_id', $login_employee->id);
+                    });
+            });
+        }
+
+        // EMPLOYEE (role_id = 3) → OWN ONLY
+        else {
+            $leads->where('emp_id', $login_employee->id);
+        }
+
+        // =========================
+        // FILTERS
+        // =========================
+
+        if (request('employee')) {
+            $leads->where('emp_id', request('employee'));
+        }
+
+        if (request('status')) {
+            $leads->where('status', request('status'));
+        }
+
+        if (request('filter_by_lead')) {
+            $leads->whereDate('assign_date', request('filter_by_lead'));
+        }
+
+        $leads = $leads->get();
+
+        // =========================
+        // EXTRA DATA
+        // =========================
+
+        $sales_emp = OfficeEmployees::whereHas('designation.department', function ($q) {
+            $q->where('department_name', 'Sales');
+        })->get();
+
+        // Seniors → Only Manager + Team Lead
+        $seniors = OfficeEmployees::whereIn('role_id', [2, 4])->get();
+
+        $lead_folders = OfficeLeadsFolders::all();
+        $clients = $leads;
+
+        return view(
+            'office.leads.leads',
+            compact('leads', 'lead_folders', 'login_employee', 'seniors', 'clients', 'sales_emp')
+        );
     }
-
-    // DEPARTMENT HEAD (role_id = 2) → WHOLE DEPARTMENT
-    elseif ($login_employee->role_id == 2) {
-
-        $deptId = $login_employee->designation->department_id;
-
-        $leads->whereHas('employee.designation', function ($q) use ($deptId) {
-            $q->where('department_id', $deptId);
-        });
-    }
-
-    // TEAM LEAD (role_id = 4) → OWN + JUNIORS
-    elseif ($login_employee->role_id == 4) {
-
-        $leads->where(function ($q) use ($login_employee) {
-            $q->where('emp_id', $login_employee->id)
-              ->orWhereHas('employee', function ($qq) use ($login_employee) {
-                  $qq->where('manager_id', $login_employee->id);
-              });
-        });
-    }
-
-    // EMPLOYEE (role_id = 3) → OWN ONLY
-    else {
-        $leads->where('emp_id', $login_employee->id);
-    }
-
-    // =========================
-    // FILTERS
-    // =========================
-
-    if (request('employee')) {
-        $leads->where('emp_id', request('employee'));
-    }
-
-    if (request('status')) {
-        $leads->where('status', request('status'));
-    }
-
-    if (request('filter_by_lead')) {
-        $leads->whereDate('assign_date', request('filter_by_lead'));
-    }
-
-    $leads = $leads->get();
-
-    // =========================
-    // EXTRA DATA
-    // =========================
-
-    $sales_emp = OfficeEmployees::whereHas('designation.department', function ($q) {
-        $q->where('department_name', 'Sales');
-    })->get();
-
-    // Seniors → Only Manager + Team Lead
-    $seniors = OfficeEmployees::whereIn('role_id', [2, 4])->get();
-
-    $lead_folders = OfficeLeadsFolders::all();
-    $clients = $leads;
-
-    return view(
-        'office.leads.leads',
-        compact('leads', 'lead_folders', 'login_employee', 'seniors', 'clients', 'sales_emp')
-    );
-}
 
 
 
@@ -295,28 +291,93 @@ public function index()
 
 
 
+    // public function single_folder($slug)
+    // {
+
+
+    //     $login_employee = Auth::guard('office_employees')->user();
+    //     $single_folder = OfficeLeadsFolders::where('slug', $slug)->first();
+    //     $lead_folders = OfficeLeadsFolders::all();
+
+    //     // filter
+    //     $leads = OfficeLeads::where('trash', false)
+    //         ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
+    //         ->when(isset($_GET['filter_by_lead']) && $_GET['filter_by_lead'] != null, fn($q) => $q->where('assign_date', $_GET['filter_by_lead']))
+    //         ->where('emp_id', $login_employee->id)
+    //         ->where('folder_id', $single_folder->id)
+    //         ->orderBy('id', 'DESC')
+    //         ->with('employee')
+    //         ->get();
+    //     // end filter
+
+    //     $single_folder_json = json_decode($single_folder->emp_json);
+
+    //     return view('office.leads.single-lead-folder', compact('lead_folders', 'leads', 'slug', 'single_folder', 'login_employee'));
+    // }
+
+
     public function single_folder($slug)
     {
-
         $login_employee = Auth::guard('office_employees')->user();
-        $single_folder = OfficeLeadsFolders::where('slug', $slug)->first();
+
+        $single_folder = OfficeLeadsFolders::where('slug', $slug)->firstOrFail();
         $lead_folders = OfficeLeadsFolders::all();
 
-        // filter
         $leads = OfficeLeads::where('trash', false)
-            ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
-            ->when(isset($_GET['filter_by_lead']) && $_GET['filter_by_lead'] != null, fn($q) => $q->where('assign_date', $_GET['filter_by_lead']))
-            ->where('emp_id', $login_employee->id)
             ->where('folder_id', $single_folder->id)
-            ->orderBy('id', 'DESC')
             ->with('employee')
-            ->get();
-        // end filter
+            ->orderBy('id', 'DESC');
 
-        $single_folder_json = json_decode($single_folder->emp_json);
+        // =========================
+        // ROLE BASED ACCESS
+        // =========================
 
-        return view('office.leads.single-lead-folder', compact('lead_folders', 'leads', 'slug', 'single_folder', 'login_employee'));
+        // ADMIN → ALL LEADS
+        if ($login_employee->role_id == 1) {
+            // no restriction
+        }
+
+        // DEPARTMENT HEAD → WHOLE DEPARTMENT
+        elseif ($login_employee->role_id == 2) {
+
+            $deptId = $login_employee->designation->department_id;
+
+            $leads->whereHas('employee.designation', function ($q) use ($deptId) {
+                $q->where('department_id', $deptId);
+            });
+        }
+
+        // TEAM LEAD → OWN + JUNIORS
+        elseif ($login_employee->role_id == 4) {
+
+            $leads->where(function ($q) use ($login_employee) {
+                $q->where('emp_id', $login_employee->id)
+                    ->orWhereHas('employee', function ($qq) use ($login_employee) {
+                        $qq->where('manager_id', $login_employee->id);
+                    });
+            });
+        }
+
+        else {
+            $leads->where('emp_id', $login_employee->id);
+        }
+
+        if (request('status')) {
+            $leads->where('status', request('status'));
+        }
+
+        if (request('filter_by_lead')) {
+            $leads->whereDate('assign_date', request('filter_by_lead'));
+        }
+
+        $leads = $leads->get();
+
+        return view(
+            'office.leads.single-lead-folder',
+            compact('lead_folders', 'leads', 'slug', 'single_folder', 'login_employee')
+        );
     }
+
     public function upload_lead_csv(Request $request, $folder_id)
     {
         $selectedCol = [];

@@ -116,7 +116,7 @@
                         @php
                             $authEmployee = Auth::guard('office_employees')->user();
                         @endphp
-                        @if (in_array($authEmployee->role_id, [1, 2]))
+                        @if (in_array($authEmployee->role_id, [1, 2, 4]))
                             <li class="nav-item me-2" role="presentation">
                                 <select class="form-select rounded-pill text-capitalize" aria-label="Default select example"
                                     name="employee" onchange="this.form.submit()" required>
@@ -271,14 +271,17 @@
                                         <th> <span class="d-none">All</span></th>
                                         <th>ID</th>
                                         <th>Assign Date</th>
-                                        <th>Assigned To</th>
+                                        @if (Auth::guard('office_employees')->user()->role_id != 3)
+                                            <th>Assigned To</th>
+                                        @endif
                                         <th>Service Name</th>
                                         <th>Client Name</th>
                                         <th>Client Phone</th>
+                                        <th>WhatsApp</th>
                                         <th>Client Email</th>
                                         <th>Price</th>
                                         <th>Latest Remark</th>
-                                        <th>Type</th>
+                                        {{-- <th>Type</th> --}}
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -292,12 +295,22 @@
                                         @endphp
                                         <tr>
                                             <td></td>
-                                            <td>#{{ $loop->iteration}}</td>
+                                            <td>#{{ $loop->iteration }}</td>
                                             <td>{{ date('d, M Y', strtotime($lead->assign_date)) }}</td>
+                                             @if (Auth::guard('office_employees')->user()->role_id != 3)
                                             <td>{{ $lead->employee->name }}</td>
+                                            @endif
                                             <td>{{ $lead->service_name }}</td>
                                             <td>{{ $lead->client_name }}</td>
                                             <td>{{ $lead->client_mobile }}</td>
+                                            <td class="text-center">
+                                                <a href="https://wa.me/91{{ preg_replace('/\D/', '', $lead->client_mobile) }}"
+                                                    target="_blank" title="Chat on WhatsApp">
+                                                    <i class="fa-brands fa-whatsapp"
+                                                        style="color:#25D366; font-size:22px;"></i>
+                                                </a>
+                                            </td>
+
                                             <td>{{ $lead->client_email }}</td>
                                             <td>{{ number_format($lead->amount) }}</td>
                                             <td>
@@ -308,7 +321,7 @@
                                                 <span
                                                     class="badge bg-primary-subtle text-dark w-100 mt-1 text-wrap">{{ $remark_json['remark'] }}</span>
                                             </td>
-                                            <td>{{ $lead->type }}</span>
+                                            {{-- <td>{{ $lead->type }}</span> --}}
                                             <td><span class="badge succes-bg text-capitalize">{{ $lead->status }}</span>
                                             </td>
                                             <td>

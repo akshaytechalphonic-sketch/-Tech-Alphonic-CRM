@@ -143,6 +143,10 @@ Route::middleware(['auth:admin'])->group(function () {
             Route::post('/task/delete', 'delete')->name('delete');
             Route::get('/view/{id}', 'view')->name('view');
             Route::post('/task/update-status/{id}', 'updateStatus')->name('updateStatus');
+            Route::get('/get-employee/{department}', 'departmentEmployee')->name('get.employee');
+
+
+            
         });
         Route::prefix('office-attendance')->name('attendance.')->controller(MyOfficeAttendanceController::class)->group(function () {
             Route::get('/', 'index')->name('index');
@@ -256,6 +260,7 @@ Route::middleware(['office_employee'])->group(function () {
             Route::post('/task/delete', 'delete')->name('delete');
             Route::get('/view/{id}', 'view')->name('view');
             Route::post('/task/update-status/{id}', 'updateStatus')->name('updateStatus');
+            Route::get('/get-employee/{department}', 'departmentEmployee')->name('get.employee');
         });
         Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
         Route::post('/meeting/cancel/{id}', [MeetingController::class, 'cancelMeeting'])->name('meetings.cancel');
