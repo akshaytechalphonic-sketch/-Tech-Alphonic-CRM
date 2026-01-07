@@ -292,7 +292,7 @@
                                         @endphp
                                         <tr>
                                             <td></td>
-                                            <td>#{{ $lead->id }}</td>
+                                            <td>#{{ $loop->iteration}}</td>
                                             <td>{{ date('d, M Y', strtotime($lead->assign_date)) }}</td>
                                             <td>{{ $lead->employee->name }}</td>
                                             <td>{{ $lead->service_name }}</td>

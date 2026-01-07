@@ -13,14 +13,7 @@ use Illuminate\Support\Facades\Hash;
 class EmployeeProfileController extends Controller
 {
 
-    // public function employeeProfile()
-    // {
-    //     $user = auth('office_employees')->user();
-    //     $office_employees = OfficeEmployees::with(['designation', 'designation.department'])->where('id',$user->id)->first();
 
-    //     return view('office.employee.profileupdate',compact('office_employees'));
-
-    // }
 
 
     public function employeeProfile()
@@ -77,8 +70,8 @@ class EmployeeProfileController extends Controller
         $user->gender = $request->gender;
 
         if ($request->filled('password')) {
-        $user->password = Hash::make($request->password);
-    }
+            $user->password = Hash::make($request->password);
+        }
 
         if ($request->hasFile('profile_image')) {
 

@@ -153,7 +153,9 @@
                                 Request::is('admin/office-leads*') ||
                                 Request::is('admin/leads-integration*') ||
                                 Request::is('admin/projects*') ||
+                                 Request::is('admin/office/meetings') ||
                                 Request::is('admin/task-management*') ||
+                                Request::is('admin/office-leads/uploaded-excels')   ||
                                 Request::is('admin/Ip-address*')
                                     ? 'block'
                                     : 'none' }};">
@@ -168,7 +170,7 @@
                                     </li>
                                      <li class="dropdown-item-sidebar">
                                         <a href="{{ route('admin.leads.uploaded_excels') }}"
-                                            class="{{ Request::is('admin/uploaded-excels') ? 'active' : '' }}">
+                                            class="{{ Request::is('admin/office-leads/uploaded-excels') ? 'active' : '' }}">
                                             <img src="{{ asset('public/admin/assets/images/icons/date-time.png') }}"
                                                 alt="">
                                             <span class="item-name">Uploaded-excels</span>
@@ -184,7 +186,7 @@
                                     </li>
                                     <li class="dropdown-item-sidebar">
                                         <a href="{{route('admin.office.meetings')}}"
-                                            class="{{ Request::is('office/meetings*') ? 'active' : '' }}">
+                                            class="{{ Request::is('admin/office/meetings') ? 'active' : '' }}">
                                             <img src="{{ asset('public/admin/assets/images/icons/date-time.png')}}"
                                                 alt="">
                                             <span class="item-name">Meetings</span>

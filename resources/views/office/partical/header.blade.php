@@ -161,9 +161,21 @@
                                     src="{{ asset('public/admin/assets/images/icons/arrow-right.png') }}"
                                     alt="" /></a>
                             <div class="dropdown-menu-sidebar"
-                                style="display: {{ Request::is('office-employee/leads') || Request::is('office-employee/chats') || Request::is('office-employee/meetings') || Request::is('office-employee/task-management*') ? 'block' : 'none' }};">
+                                style="display: {{ Request::is('office-employee/leads') || Request::is('office-employee/chats') || Request::is('office-employee/meetings') || Request::is('office-employee/department') || Request::is('office-employee/task-management*') ? 'block' : 'none' }};">
 
                                 <ul>
+                                    
+                                   @if(Auth::guard('office_employees')->user()->role_id != 3)
+                                    <li class="dropdown-item-sidebar">
+                                        <a href="{{ route('office_employee.department.employee.index') }}"
+                                            class="{{ Request::is('office-employee/department') ? 'active' : '' }}">
+                                            <img src="{{ asset('public/admin/assets/images/icons/users.png') }}"
+                                                alt="">
+                                            <span class="item-name">Departments Employee</span>
+                                        </a>
+                                    </li>
+                                    @endif
+
                                     <li class="dropdown-item-sidebar">
                                         <a href="{{ route('office_employee.leads.index') }}"
                                             class="{{ Request::is('office-employee/leads') ? 'active' : '' }}"><img

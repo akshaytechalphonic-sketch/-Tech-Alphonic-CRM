@@ -31,6 +31,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\employee\EmployeeProfileController;
+use App\Http\Controllers\employee\EmployeesController;
 
 
 /*
@@ -201,7 +202,7 @@ Route::middleware(['auth:admin'])->group(function () {
          Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
                 Route::get('/', 'employeeProfile')->name('profile');
                 Route::put('/update', 'profileUpdate')->name('profile.update');
-            });
+        });
 
         Route::prefix('Ip-address')->name('ip.')->controller(AllowedIpController::class)->group(function () {
             Route::get('/', [AllowedIpController::class, 'index'])->name('index');
@@ -259,10 +260,17 @@ Route::middleware(['office_employee'])->group(function () {
         Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
         Route::post('/meeting/cancel/{id}', [MeetingController::class, 'cancelMeeting'])->name('meetings.cancel');
 
-        Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
+          Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
                 Route::get('/', 'employeeProfile')->name('profile');
                 Route::put('/update', 'profileUpdate')->name('profile.update');
             });
+
+            Route::prefix('department')->controller(EmployeesController::class)->group(function () {
+                Route::get('/', 'index')->name('department.employee.index');
+            
+            });
+
+        
     });
     // });
 });
