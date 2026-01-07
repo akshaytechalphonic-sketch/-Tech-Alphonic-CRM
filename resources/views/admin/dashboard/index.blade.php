@@ -240,42 +240,7 @@ option.inactive::before {
         @if (isset($_GET['employee']) && $_GET['employee'] != '')
             <div class="laevae-boxes-dashboard mb-3">
                 <div class="row">
-                   
-                        <div class="col-md-6 mb-3">
-                            <div class="card shadow-sm border-0">
-                                <div class="card-body d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <h6 class="text-muted mb-1">Active</h6>
-                                        <h2 class="text-success fw-bold mb-0">
-                                            {{ $active_emp ?? 0 }}
-                                        </h2>
-                                    </div>
-                                    <div class="icon-box bg-success bg-opacity-10 text-success">
-                                        <i class="fa fa-check-circle fs-3"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Inactive -->
-                        <div class="col-lg-6">
-                            <div class="card shadow-sm border-0">
-                                <div class="card-body d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <h6 class="text-muted mb-1">Inactive</h6>
-                                        <h2 class="text-danger fw-bold mb-0">
-                                            {{ $Inactive_emp ?? 0 }}
-                                        </h2>
-                                    </div>
-                                    <div class="icon-box bg-danger bg-opacity-10 text-danger">
-                                        <i class="fa fa-times-circle fs-3 text-danger"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                   
-
-
+                  
                     <div class="col-lg-3 mb-3 ">
                         <form class="leave-boxone h-100">
                             <h5>Monthly Target <span>{!! isset($_GET['filter_by_month']) && $_GET['filter_by_month'] != ''
@@ -505,7 +470,47 @@ option.inactive::before {
                     </div>
                 @endif
             </div>
-        @endif
+        @else
+
+        
+         <div class="laevae-boxes-dashboard mb-3">
+                <div class="row">
+                   
+                        <div class="col-md-6 mb-3">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-body d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted mb-1">Active</h6>
+                                        <h2 class="text-success fw-bold mb-0">
+                                            {{ $active_emp ?? 0 }}
+                                        </h2>
+                                    </div>
+                                    <div class="icon-box bg-success bg-opacity-10 text-success">
+                                        <i class="fa fa-check-circle fs-3"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inactive -->
+                        <div class="col-lg-6">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-body d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="text-muted mb-1">Inactive</h6>
+                                        <h2 class="text-danger fw-bold mb-0">
+                                            {{ $Inactive_emp ?? 0 }}
+                                        </h2>
+                                    </div>
+                                    <div class="icon-box bg-danger bg-opacity-10 text-danger">
+                                        <i class="fa fa-times-circle fs-3 text-danger"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+         </div>
+         @endif
     </div>
 
     <div class="search-box-mob">

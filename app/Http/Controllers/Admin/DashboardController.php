@@ -15,17 +15,19 @@ class DashboardController extends Controller
 {
     public function index()
     {
-       $active_emp=OfficeEmployees::where('is_online',1)->count();
-       
-       $Inactive_emp=OfficeEmployees::where('is_online',0)->count();
-       
+
+        $active_emp = OfficeEmployees::where('is_online', 1)->count();
+
+        $Inactive_emp = OfficeEmployees::where('is_online', 0)->count();
+
         $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
             $query->where('department_name', 'Sales');
         })->with(['designation', 'designation.department'])->get();
         $idd = isset($_GET['employee']) && $_GET['employee'] != '' ? $_GET['employee'] : 1;
-    //   $idd = request('employee', optional($sales_emp->first())->id);
+        //   $idd = request('employee', optional($sales_emp->first())->id);
 
         $login_employee = OfficeEmployees::find($idd);
+     
 
 
         if (isset($_GET['filter_by_month']) && $_GET['filter_by_month'] != '') {
@@ -50,11 +52,11 @@ class DashboardController extends Controller
         $taskQuery = OfficeTask::where('assigned_to', $idd);
 
         // Employee-wise counts
-       $total_tasks     = OfficeTask::where('assigned_to', $idd)->count();
-$completed_tasks = OfficeTask::where('assigned_to', $idd)->where('status','completed')->count();
-$in_progress     = OfficeTask::where('assigned_to', $idd)->where('status','in_progress')->count();
-$pending_tasks   = OfficeTask::where('assigned_to', $idd)->whereIn('status',['todo','review'])->count();
-      
+        $total_tasks     = OfficeTask::where('assigned_to', $idd)->count();
+        $completed_tasks = OfficeTask::where('assigned_to', $idd)->where('status', 'completed')->count();
+        $in_progress     = OfficeTask::where('assigned_to', $idd)->where('status', 'in_progress')->count();
+        $pending_tasks   = OfficeTask::where('assigned_to', $idd)->whereIn('status', ['todo', 'review'])->count();
+
 
         // Format data for Chart.js
         $taskChart = [
@@ -62,8 +64,7 @@ $pending_tasks   = OfficeTask::where('assigned_to', $idd)->whereIn('status',['to
             'data'   => [$completed_tasks, $in_progress, $pending_tasks],
         ];
 
+        return view('admin.dashboard.index', compact('leads', 'login_employee', 'monthlyTarget', 'all_leads', 'sales_emp', 'total_tasks', 'completed_tasks', 'in_progress', 'pending_tasks', 'taskChart', 'active_emp', 'Inactive_emp'));
         
-
-        return view('admin.dashboard.index', compact('leads', 'login_employee', 'monthlyTarget', 'all_leads', 'sales_emp', 'total_tasks', 'completed_tasks', 'in_progress', 'pending_tasks', 'taskChart','active_emp','Inactive_emp'));
     }
 }

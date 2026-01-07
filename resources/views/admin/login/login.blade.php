@@ -161,7 +161,7 @@
                                                 @enderror
                                             </div>
                                             <div class="mb-3">
-                                                <label for="password" class="form-label">Password</label>
+                                                <label for="password" class="form-label">assword</label>
                                                 <input type="password" class="form-control" name="password" id="password">
                                                 <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
 
@@ -254,6 +254,28 @@
         }
     }
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const togglePassword = document.querySelector('.toggle-password');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function () {
+
+            if (password.type === "password") {
+                password.type = "text";
+                this.classList.remove("fa-eye");
+                this.classList.add("fa-eye-slash");
+            } else {
+                password.type = "password";
+                this.classList.remove("fa-eye-slash");
+                this.classList.add("fa-eye");
+            }
+
+        });
+    });
+</script>
+
 
 </body>
 

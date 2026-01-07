@@ -387,6 +387,28 @@
             }
         }
     </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const togglePassword = document.querySelector('.toggle-password');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function () {
+
+            if (password.type === "password") {
+                password.type = "text";
+                this.classList.remove("fa-eye");
+                this.classList.add("fa-eye-slash");
+            } else {
+                password.type = "password";
+                this.classList.remove("fa-eye-slash");
+                this.classList.add("fa-eye");
+            }
+
+        });
+    });
+</script>
+
 </body>
 
 </html>
