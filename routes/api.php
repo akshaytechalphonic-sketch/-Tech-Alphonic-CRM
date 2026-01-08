@@ -32,3 +32,4 @@ Route::post('/check-office', [LocationController::class, 'checkOfficeArea']);
 Route::get('/cronjob-notification', [NotificationController::class, 'cronjob_notification']);
 
 Route::any('/employees/offline-all', [ArtisanTerminalController::class, 'offlineAll']);
+Route::any('/meetings/status-update', [ArtisanTerminalController::class, 'meetingStatusUpdate']);

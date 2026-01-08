@@ -339,5 +339,4 @@ Route::get('/google/connect', [GoogleController::class, 'redirectToGoogle'])->na
 Route::get('/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 Route::post('/meeting/schedule', [MeetingController::class, 'scheduleMeeting'])->name('meetings.store')->middleware('office_employee');
 
-// routes/api.php
-// Route::any('/employees/offline-all', [ArtisanTerminalController::class, 'offlineAll']);
+

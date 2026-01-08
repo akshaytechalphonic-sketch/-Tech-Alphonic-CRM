@@ -7,7 +7,60 @@
 @section('content')
     <div class="main-content">
 
+        <div class="dash-tabs d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex">
+                <form class="nav nav-pills" id="pills-tab" role="tablist">
+                    @php
+                        $authEmployee = Auth::guard('admin')->user();
+                    @endphp
+                    @if (in_array($authEmployee->role_id, [1, 2, 4]))
+                        <li class="nav-item me-2" role="presentation">
+                            <select class="form-select rounded-pill text-capitalize" aria-label="Default select example"
+                                name="employee" onchange="this.form.submit()" required>
+                                <option value="" selected>All Sales Employee</option>
+                                @foreach ($sales_emp as $items)
+                                    <option value="{{ $items->id }}"
+                                        {{ isset($_GET['employee']) ? ($_GET['employee'] == $items->id ? 'selected' : '') : '' }}>
+                                        {{ $items->name }} -
+                                        ({{ $items->designation->designation_name }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </li>
+                    @endif
+                    <li class="nav-item" role="presentation">
+                        <select class="form-select rounded-pill" aria-label="Default select example"
+                            onchange="this.form.submit()" name="status" required>
+                            <option value="" selected>Select status</option>
+                            <option value="scheduled"
+                                {{ isset($_GET['status']) ? ($_GET['status'] == 'scheduled' ? 'selected' : '') : '' }}>
+                                Scheduled
+                            </option>
+                            <option value="completed"
+                                {{ isset($_GET['status']) ? ($_GET['status'] == 'completed' ? 'selected' : '') : '' }}>
+                                Completed
+                            </option>
+                            <option value="cancelled"
+                                {{ isset($_GET['status']) ? ($_GET['status'] == 'cancelled' ? 'selected' : '') : '' }}>
+                                Cancelled
+                            </option>
 
+                        </select>
+                    </li>
+                    <li class="nav-item ms-2 d-flex align-items-center" role="presentation">
+                        <input type="date" name="date" onchange="this.form.submit()"
+                            class="form-control rounded-pill "
+                            value="{{ isset($_GET['date']) && $_GET['date'] != '' ? $_GET['date'] : '' }}"
+                            max="{{ date('Y-m-d') }}">
+                        @if (isset($_GET['date']) && $_GET['date'] != '')
+                            <a class="ms-2"
+                                href="{{ url()->current() . '?' . http_build_query(request()->except('date')) }}"><i
+                                    class="fa-regular fa-circle-xmark"></i></a>
+                        @endif
+                    </li>
+                </form>
+            </div>
+        </div>
         <div class="dash-tabs-content no-scrollbar">
             <div class="tab-content" id="pills-tabContent">
 
@@ -51,14 +104,14 @@
                                         <td>{{ $meeting->title }}</td>
 
                                         <td>
-                                              @if (isset($meeting->officelead?->id))
-                                            <a
-                                                href="{{ route('admin.leads.single_lead', ['id' => $meeting->officelead->id]) }}">
-                                                {{ $meeting->officelead->client_name }}
-                                            </a>
-                                             @else
-                                                    <span>N/A</span>
-                                                @endif
+                                            @if (isset($meeting->officelead?->id))
+                                                <a
+                                                    href="{{ route('admin.leads.single_lead', ['id' => $meeting->officelead->id]) }}">
+                                                    {{ $meeting->officelead->client_name }}
+                                                </a>
+                                            @else
+                                                <span>N/A</span>
+                                            @endif
                                         </td>
 
                                         <td>{{ $meeting->employee->name ?? 'N/A' }}</td>

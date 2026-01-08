@@ -32,8 +32,18 @@ class MyOfficeController extends Controller
 
     public function meetinglist()
     {
-        $meetings = Meeting::with('employee', 'officelead')->orderBy('date', 'desc')->get();
-        return view('admin.office.meetings', compact('meetings'));
+         $now = Carbon::now('Asia/Kolkata');
+        // $meetings = Meeting::with('employee', 'officelead')->orderBy('date', 'desc')->get();
+        $meetings = Meeting::when(isset($_GET['employee']) && $_GET['employee'] != null, fn($q) => $q->where('created_by', $_GET['employee']))
+            ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
+            ->when(isset($_GET['date']) && $_GET['date'] != null,  fn($q) => $q->where('date', $_GET['date']))
+            ->orderBy('id', 'DESC')
+            ->with('employee')
+            ->get();
+         $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
+            $query->where('department_name', 'Sales');
+        })->with(['designation', 'designation.department'])->get();
+        return view('admin.office.meetings', compact('meetings','sales_emp'));
     }
 
     public function profile($id)
