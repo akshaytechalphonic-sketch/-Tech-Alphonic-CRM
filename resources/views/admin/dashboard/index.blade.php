@@ -53,15 +53,16 @@
         }
 
         option.active::before {
-    content: "● ";
-    color: #28a745; /* green */
-}
+            content: "● ";
+            color: #28a745;
+            /* green */
+        }
 
-option.inactive::before {
-    content: "● ";
-    color: #dc3545; /* red */
-}
-
+        option.inactive::before {
+            content: "● ";
+            color: #dc3545;
+            /* red */
+        }
     </style>
     @php
         $month = date('m');
@@ -230,8 +231,8 @@ option.inactive::before {
                         @foreach ($sales_emp as $items)
                             <option value="{{ $items->id }}"
                                 {{ isset($_GET['employee']) ? ($_GET['employee'] == $items->id ? 'selected' : '') : '' }}>
-                                 {{ $items->is_online == '1' ? '🟢' : '🔴' }} {{ $items->name }} -
-                                {{ $items->email}}</option>
+                                {{ $items->is_online == '1' ? '🟢' : '🔴' }} {{ $items->name }} -
+                                {{ $items->email }}</option>
                         @endforeach
                     </select>
                 </li>
@@ -240,7 +241,7 @@ option.inactive::before {
         @if (isset($_GET['employee']) && $_GET['employee'] != '')
             <div class="laevae-boxes-dashboard mb-3">
                 <div class="row">
-                  
+
                     <div class="col-lg-3 mb-3 ">
                         <form class="leave-boxone h-100">
                             <h5>Monthly Target <span>{!! isset($_GET['filter_by_month']) && $_GET['filter_by_month'] != ''
@@ -324,10 +325,9 @@ option.inactive::before {
                                     @endif
                                 </div>
                                 <div class="laeave-ount-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img"
-                                        width="1em" height="1em" viewBox="0 0 32 32"
-                                        data-icon="oui:app-users-roles" data-inline="false" style="font-size: 32px;"
-                                        class="iconify iconify--oui">
+                                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em"
+                                        height="1em" viewBox="0 0 32 32" data-icon="oui:app-users-roles"
+                                        data-inline="false" style="font-size: 32px;" class="iconify iconify--oui">
                                         <path fill="currentColor"
                                             d="M19.307 3.21a2.91 2.91 0 1 0-.223 1.94a11.64 11.64 0 0 1 8.232 7.049l1.775-.698a13.58 13.58 0 0 0-9.784-8.291m-2.822 1.638a.97.97 0 1 1 0-1.939a.97.97 0 0 1 0 1.94m-4.267.805l-.717-1.774a13.58 13.58 0 0 0-8.291 9.784a2.91 2.91 0 1 0 1.94.223a11.64 11.64 0 0 1 7.068-8.233m-8.34 11.802a.97.97 0 1 1 0-1.94a.97.97 0 0 1 0 1.94m12.607 8.727a2.91 2.91 0 0 0-2.599 1.62a11.64 11.64 0 0 1-8.233-7.05l-1.774.717a13.58 13.58 0 0 0 9.813 8.291a2.91 2.91 0 1 0 2.793-3.578m0 3.879a.97.97 0 1 1 0-1.94a.97.97 0 0 1 0 1.94M32 16.485a2.91 2.91 0 1 0-4.199 2.599a11.64 11.64 0 0 1-7.05 8.232l.718 1.775a13.58 13.58 0 0 0 8.291-9.813A2.91 2.91 0 0 0 32 16.485m-2.91.97a.97.97 0 1 1 0-1.94a.97.97 0 0 1 0 1.94">
                                         </path>
@@ -389,7 +389,7 @@ option.inactive::before {
                                             'bg-primary-subtle text-primary-emphasis' => 'not connected',
                                             'bg-success-subtle text-success-emphasis' => 'cold',
                                             'bg-warning text-dark' => 'future',
-                                             'bg-warning text-light' => 'follow up',
+                                            'bg-warning text-light' => 'follow up',
                                             'bg-info text-dark' => 'loss',
                                             'bg-success-subtle text-primary-emphasis' => 'not intrested',
                                         ];
@@ -423,28 +423,40 @@ option.inactive::before {
 
                     <div class="row mb-4">
                         <div class="col-md-3">
-                            <div class="card p-3 text-center">
-                                <h6>Total Tasks</h6>
-                                <h3>{{ $total_tasks }}</h3>
-                            </div>
+                            <a href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}">
+                                <div class="card p-3 text-center">
+                                    <h6>Total Tasks</h6>
+                                    <h3>{{ $total_tasks }}</h3>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-md-3">
-                            <div class="card p-3 text-center">
-                                <h6>Completed</h6>
-                                <h3 class="text-success">{{ $completed_tasks }}</h3>
-                            </div>
+                            <a
+                                href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}&status={{ 'completed' }}">
+                                <div class="card p-3 text-center">
+                                    <h6>Completed</h6>
+                                    <h3 class="text-success">{{ $completed_tasks }}</h3>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-md-3">
-                            <div class="card p-3 text-center">
-                                <h6>In Progress</h6>
-                                <h3 class="text-warning">{{ $in_progress }}</h3>
-                            </div>
+                            <a
+                                href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}&status={{ 'in_progress' }}">
+                                <div class="card p-3 text-center">
+                                    <h6>In Progress</h6>
+                                    <h3 class="text-warning">{{ $in_progress }}</h3>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-md-3">
-                            <div class="card p-3 text-center">
-                                <h6>Pending</h6>
-                                <h3 class="text-danger">{{ $pending_tasks }}</h3>
-                            </div>
+                            <a
+                                href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}&status={{ 'review' }}">
+
+                                <div class="card p-3 text-center">
+                                    <h6>Pending</h6>
+                                    <h3 class="text-danger">{{ $pending_tasks }}</h3>
+                                </div>
+                            </a>
                         </div>
                     </div>
 
@@ -471,46 +483,93 @@ option.inactive::before {
                 @endif
             </div>
         @else
-
-        
-         <div class="laevae-boxes-dashboard mb-3">
+            <div class="laevae-boxes-dashboard mb-3">
                 <div class="row">
-                   
-                        <div class="col-md-6 mb-3">
-                            <div class="card shadow-sm border-0">
+
+                    <div class="col-md-3 mb-3">
+                        <a
+                            href="{{ route('admin.office.index', ['status' => 'online', 'employee' => request('employee')]) }}">
+                            <div class="card shadow-sm border-0 cursor-pointer">
                                 <div class="card-body d-flex align-items-center justify-content-between">
                                     <div>
-                                        <h6 class="text-muted mb-1">Active</h6>
+                                        <h6 class="text-muted mb-1">Online</h6>
                                         <h2 class="text-success fw-bold mb-0">
-                                            {{ $active_emp ?? 0 }}
+                                            {{ $online ?? 0 }}
                                         </h2>
                                     </div>
                                     <div class="icon-box bg-success bg-opacity-10 text-success">
-                                        <i class="fa fa-check-circle fs-3"></i>
+                                        <i class="fa fa-circle"></i>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
 
-                        <!-- Inactive -->
-                        <div class="col-lg-6">
+                    </div>
+
+
+                    <!-- Inactive -->
+                    <div class="col-lg-3">
+                        <a
+                            href="{{ route('admin.office.index', ['status' => 'offline', 'employee' => request('employee')]) }}">
+
                             <div class="card shadow-sm border-0">
                                 <div class="card-body d-flex align-items-center justify-content-between">
                                     <div>
-                                        <h6 class="text-muted mb-1">Inactive</h6>
+                                        <h6 class="text-muted mb-1">Offline</h6>
                                         <h2 class="text-danger fw-bold mb-0">
-                                            {{ $Inactive_emp ?? 0 }}
+                                            {{ $offline ?? 0 }}
                                         </h2>
                                     </div>
                                     <div class="icon-box bg-danger bg-opacity-10 text-danger">
-                                        <i class="fa fa-times-circle fs-3 text-danger"></i>
+                                        <i class="fa fa-circle text-danger"></i>
                                     </div>
                                 </div>
                             </div>
+                        </a>
+
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card shadow-sm border-0">
+                            <a
+                            href="{{ route('admin.office.index', ['status' => '1', 'employee' => request('employee')]) }}">
+                            <div class="card-body d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="text-muted mb-1">Active</h6>
+                                    <h2 class="text-success fw-bold mb-0">
+                                        {{ $active_emp ?? 0 }}
+                                    </h2>
+                                </div>
+                                <div class="icon-box bg-success bg-opacity-10 text-success">
+                                    <i class="fa fa-check-circle fs-3"></i>
+                                </div>
+                            </div>
+                            </a>
                         </div>
+                    </div>
+
+                    <!-- Inactive -->
+                    <div class="col-lg-3">
+                        <div class="card shadow-sm border-0">
+                            <a
+                            href="{{ route('admin.office.index', ['status' => '2', 'employee' => request('employee')]) }}">
+                            <div class="card-body d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="text-muted mb-1">Inactive</h6>
+                                    <h2 class="text-danger fw-bold mb-0">
+                                        {{ $Inactive_emp ?? 0 }}
+                                    </h2>
+                                </div>
+                                <div class="icon-box bg-danger bg-opacity-10 text-danger">
+                                    <i class="fa fa-times-circle fs-3 text-danger"></i>
+                                </div>
+                            </div>
+                            </a>
+                        </div>
+
+                    </div>
                 </div>
-         </div>
-         @endif
+            </div>
+        @endif
     </div>
 
     <div class="search-box-mob">

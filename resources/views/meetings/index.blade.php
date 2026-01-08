@@ -9,6 +9,61 @@
 @section('content')
     <div class="main-content">
         <!-- write-body-content here start -->
+
+        <div class="dash-tabs d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex">
+                <form class="nav nav-pills" id="pills-tab" role="tablist">
+                    @php
+                        $authEmployee = Auth::guard('admin')->user();
+                    @endphp
+                    @if (in_array($authEmployee->role_id, [1, 2, 4]))
+                        <li class="nav-item me-2" role="presentation">
+                            <select class="form-select rounded-pill text-capitalize" aria-label="Default select example"
+                                name="employee" onchange="this.form.submit()" required>
+                                <option value="" selected>All Sales Employee</option>
+                                @foreach ($sales_emp as $items)
+                                    <option value="{{ $items->id }}"
+                                        {{ isset($_GET['employee']) ? ($_GET['employee'] == $items->id ? 'selected' : '') : '' }}>
+                                        {{ $items->name }} -
+                                        ({{ $items->designation->designation_name }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </li>
+                    @endif
+                    <li class="nav-item" role="presentation">
+                        <select class="form-select rounded-pill" aria-label="Default select example"
+                            onchange="this.form.submit()" name="status" required>
+                            <option value="" selected>Select status</option>
+                            <option value="scheduled"
+                                {{ isset($_GET['status']) ? ($_GET['status'] == 'scheduled' ? 'selected' : '') : '' }}>
+                                Scheduled
+                            </option>
+                            <option value="completed"
+                                {{ isset($_GET['status']) ? ($_GET['status'] == 'completed' ? 'selected' : '') : '' }}>
+                                Completed
+                            </option>
+                            <option value="cancelled"
+                                {{ isset($_GET['status']) ? ($_GET['status'] == 'cancelled' ? 'selected' : '') : '' }}>
+                                Cancelled
+                            </option>
+
+                        </select>
+                    </li>
+                    <li class="nav-item ms-2 d-flex align-items-center" role="presentation">
+                        <input type="date" name="date" onchange="this.form.submit()"
+                            class="form-control rounded-pill "
+                            value="{{ isset($_GET['date']) && $_GET['date'] != '' ? $_GET['date'] : '' }}"
+                            max="{{ date('Y-m-d') }}">
+                        @if (isset($_GET['date']) && $_GET['date'] != '')
+                            <a class="ms-2"
+                                href="{{ url()->current() . '?' . http_build_query(request()->except('date')) }}"><i
+                                    class="fa-regular fa-circle-xmark"></i></a>
+                        @endif
+                    </li>
+                </form>
+            </div>
+        </div>
         <div class="pages-content">
             <div class="dash-tabs d-flex justify-content-between align-items-end mb-3">
                 <div class="d-flex align-items-center gap-3 w-100">
@@ -99,14 +154,14 @@
                                                 @else
                                                     <span class="text-muted">—</span>
                                                 @endif --}}
-                                        <input type="text" value="{{ $meeting->meet_link }} ">
-                                                
+                                                <input type="text" value="{{ $meeting->meet_link }} ">
+
                                             </td>
 
                                             <td>
-                                                @if ($meeting->status === 'scheduled' && $status == 'completed')
+                                                @if ($meeting->status === 'scheduled' )
                                                     <span class="badge bg-primary">
-                                                        Completed
+                                                        Scheduled
                                                     </span>
                                                 @elseif ($meeting->status === 'cancelled')
                                                     <span class="badge bg-danger">
@@ -133,22 +188,20 @@
                                             </td>
                                             <td>
                                                 @if ($meeting->status === 'scheduled' && $status !== 'completed')
-                                                <ul class="action-icons d-flex list-unstyled gap-2 mb-0">
-                                                    <li>
-                                                        <i class="fas fa-calendar-times text-danger cancel-meeting-btn"
-                                                            style="font-size:22px; cursor:pointer;"
-                                                            data-id="{{ $meeting->id }}" title="Cancel Meeting"></i>
+                                                    <ul class="action-icons d-flex list-unstyled gap-2 mb-0">
+                                                        <li>
+                                                            <i class="fas fa-calendar-times text-danger cancel-meeting-btn"
+                                                                style="font-size:22px; cursor:pointer;"
+                                                                data-id="{{ $meeting->id }}" title="Cancel Meeting"></i>
 
-                                                        <form id="cancel-form-{{ $meeting->id }}"
-                                                            action="{{ route('office_employee.meetings.cancel', $meeting->id) }}"
-                                                            method="POST" style="display:none;">
-                                                            @csrf
-                                                        </form>
-                                                    </li>
-                                                </ul>
+                                                            <form id="cancel-form-{{ $meeting->id }}"
+                                                                action="{{ route('office_employee.meetings.cancel', $meeting->id) }}"
+                                                                method="POST" style="display:none;">
+                                                                @csrf
+                                                            </form>
+                                                        </li>
+                                                    </ul>
                                                 @else
-
-                                               
                                                 @endif
 
 

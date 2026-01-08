@@ -128,11 +128,19 @@
                                         <td><input type="text" value="{{ $meeting->meet_link }} "></td>
 
                                         <td>
-                                            <span
-                                                class="badge 
-                                {{ $status == 'upcoming' ? 'bg-success' : 'bg-secondary' }}">
-                                                {{ ucfirst($status) }}
-                                            </span>
+                                            @if ($meeting->status === 'scheduled')
+                                                <span class="badge bg-primary">
+                                                    Scheduled
+                                                </span>
+                                            @elseif ($meeting->status === 'cancelled')
+                                                <span class="badge bg-danger">
+                                                    Cancelled
+                                                </span>
+                                            @else
+                                                <span class="badge bg-success">
+                                                    {{ ucfirst($meeting->status) }}
+                                                </span>
+                                            @endif
                                         </td>
                                         <td>{{ $meeting->description ?? '-' }}</td>
 

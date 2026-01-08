@@ -15,36 +15,51 @@ use App\Models\OfficeLeads;
 class MeetingController extends Controller
 {
 
-    public function index(Request $request)
+    // public function index(Request $request)
+    // {
+    //     $employee = auth('office_employees')->user();
+    //     $query = Meeting::with('employee', 'officelead')
+    //         ->where(function ($q) use ($employee) {
+    //             $q->where('created_by', $employee->id)
+    //                 ->orWhere('senior_id', $employee->id);
+    //         })
+    //         ->orderBy('date', 'desc');
+
+    //     if ($request->from_date) {
+    //         $query->whereDate('date', '>=', $request->from_date);
+    //     }
+
+    //     if ($request->to_date) {
+    //         $query->whereDate('date', '<=', $request->to_date);
+    //     }
+
+    //     if ($request->status) {
+    //         if ($request->status == 'completed') {
+    //             $query->whereRaw("CONCAT(date,' ',end_time) < NOW()");
+    //         } else {
+    //             $query->whereRaw("CONCAT(date,' ',end_time) >= NOW()");
+    //         }
+    //     }
+
+    //     $meetings = $query->get();
+
+
+    //     return view('meetings.index', compact('meetings'));
+    // }
+
+     public function index()
     {
-        $employee = auth('office_employees')->user();
-        $query = Meeting::with('employee', 'officelead')
-            ->where(function ($q) use ($employee) {
-                $q->where('created_by', $employee->id)
-                    ->orWhere('senior_id', $employee->id);
-            })
-            ->orderBy('date', 'desc');
-
-        if ($request->from_date) {
-            $query->whereDate('date', '>=', $request->from_date);
-        }
-
-        if ($request->to_date) {
-            $query->whereDate('date', '<=', $request->to_date);
-        }
-
-        if ($request->status) {
-            if ($request->status == 'completed') {
-                $query->whereRaw("CONCAT(date,' ',end_time) < NOW()");
-            } else {
-                $query->whereRaw("CONCAT(date,' ',end_time) >= NOW()");
-            }
-        }
-
-        $meetings = $query->get();
-
-
-        return view('meetings.index', compact('meetings'));
+        $now = Carbon::now('Asia/Kolkata');
+        $meetings = Meeting::when(isset($_GET['employee']) && $_GET['employee'] != null, fn($q) => $q->where('created_by', $_GET['employee']))
+            ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
+            ->when(isset($_GET['date']) && $_GET['date'] != null,  fn($q) => $q->where('date', $_GET['date']))
+            ->orderBy('id', 'DESC')
+            ->with('employee')
+            ->get();
+         $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
+            $query->where('department_name', 'Sales');
+        })->with(['designation', 'designation.department'])->get();
+           return view('meetings.index', compact('meetings','sales_emp'));
     }
 
 

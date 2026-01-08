@@ -18,32 +18,71 @@ use Illuminate\Support\Facades\Hash;
 class MyOfficeController extends Controller
 {
 
-    public function index()
-    {
+    // public function index()
+    // {
 
+    //     $departments = OfficeDepartments::withCount('employees')->get();
+    //     $select_departments = OfficeDepartments::where('status', '1')->get();
+    //     $designations = OfficeDesignations::withCount('employees')->with('department')->get();
+    //     $office_employees = OfficeEmployees::with(['designation', 'designation.department'])->get();
+    //     $teams = OfficeTeams::all();
+
+    //     return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'teams'));
+    // }
+    public function index(Request $request)
+    {
+    //    dd($request->all());
         $departments = OfficeDepartments::withCount('employees')->get();
         $select_departments = OfficeDepartments::where('status', '1')->get();
         $designations = OfficeDesignations::withCount('employees')->with('department')->get();
-        $office_employees = OfficeEmployees::with(['designation', 'designation.department'])->get();
         $teams = OfficeTeams::all();
 
-        return view('admin.office.create-employee', compact('office_employees', 'departments', 'designations', 'select_departments', 'teams'));
+        $office_employees = OfficeEmployees::with(['designation', 'designation.department']);
+
+        if ($request->status === 'online') {          
+            $office_employees->where('is_online', '1');
+        }
+
+        if ($request->status === 'offline') {
+            $office_employees->where('is_online', '0');
+        }
+         if ($request->status === '1') {          
+            $office_employees->where('status', '1');
+        }
+
+        if ($request->status === '2') {
+            $office_employees->where('status', '2');
+        }
+
+
+        $office_employees = $office_employees->get();
+
+        return view(
+            'admin.office.create-employee',
+            compact(
+                'office_employees',
+                'departments',
+                'designations',
+                'select_departments',
+                'teams'
+            )
+        );
     }
+
 
     public function meetinglist()
     {
-         $now = Carbon::now('Asia/Kolkata');
-        // $meetings = Meeting::with('employee', 'officelead')->orderBy('date', 'desc')->get();
+        $now = Carbon::now('Asia/Kolkata');
         $meetings = Meeting::when(isset($_GET['employee']) && $_GET['employee'] != null, fn($q) => $q->where('created_by', $_GET['employee']))
             ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
             ->when(isset($_GET['date']) && $_GET['date'] != null,  fn($q) => $q->where('date', $_GET['date']))
             ->orderBy('id', 'DESC')
             ->with('employee')
             ->get();
-         $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
+        $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
             $query->where('department_name', 'Sales');
         })->with(['designation', 'designation.department'])->get();
-        return view('admin.office.meetings', compact('meetings','sales_emp'));
+        return view('admin.office.meetings', compact('meetings', 'sales_emp'));
     }
 
     public function profile($id)
@@ -251,7 +290,7 @@ class MyOfficeController extends Controller
         }
         $departments = OfficeDepartments::where('status', '1')->get();
         $designations = OfficeDesignations::with('department')->where('status', '1')->get();
-        $managers = OfficeEmployees::whereIn('role_id', [1,2,4])->get();
+        $managers = OfficeEmployees::whereIn('role_id', [1, 2, 4])->get();
 
         $roles = Role::active()->get();
 
@@ -267,7 +306,7 @@ class MyOfficeController extends Controller
         $office_employees = OfficeEmployees::with(['designation', 'designation.department'])->where('id', $id)->first();
 
 
-        $managers = OfficeEmployees::with('role')->whereIn('role_id', [1,2,4])->get();
+        $managers = OfficeEmployees::with('role')->whereIn('role_id', [1, 2, 4])->get();
         // dd($managers);
 
         $roles = Role::active()->get();
@@ -324,9 +363,9 @@ class MyOfficeController extends Controller
         $OfficeEmployees->monthly_sick_leave = $request->input('monthly_sick_leave');
         $OfficeEmployees->monthly_sales_target = $request->input('monthly_sales_target');
         $OfficeEmployees->other_leave = $request->input('other_leave');
-      if ($request->filled('password')) {
-    $OfficeEmployees->password = Hash::make($request->password);
-}
+        if ($request->filled('password')) {
+            $OfficeEmployees->password = Hash::make($request->password);
+        }
 
         $family_photo = null;
         if ($request->hasFile('family_photo')) {

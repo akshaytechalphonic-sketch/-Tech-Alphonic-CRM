@@ -16,9 +16,11 @@ class DashboardController extends Controller
     public function index()
     {
 
-        $active_emp = OfficeEmployees::where('is_online', 1)->count();
+        $online = OfficeEmployees::where('is_online', 1)->count();
+        $offline = OfficeEmployees::where('is_online', 0)->count();
+        $active_emp = OfficeEmployees::where('status', '1')->count();
+        $Inactive_emp = OfficeEmployees::where('status', '2')->count();
 
-        $Inactive_emp = OfficeEmployees::where('is_online', 0)->count();
 
         $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
             $query->where('department_name', 'Sales');
@@ -64,7 +66,7 @@ class DashboardController extends Controller
             'data'   => [$completed_tasks, $in_progress, $pending_tasks],
         ];
 
-        return view('admin.dashboard.index', compact('leads', 'login_employee', 'monthlyTarget', 'all_leads', 'sales_emp', 'total_tasks', 'completed_tasks', 'in_progress', 'pending_tasks', 'taskChart', 'active_emp', 'Inactive_emp'));
+        return view('admin.dashboard.index', compact('leads', 'login_employee', 'monthlyTarget', 'all_leads', 'sales_emp', 'total_tasks', 'completed_tasks', 'in_progress', 'pending_tasks', 'taskChart', 'active_emp', 'Inactive_emp','online','offline'));
         
     }
 }
