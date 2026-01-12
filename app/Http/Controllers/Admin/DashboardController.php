@@ -29,7 +29,7 @@ class DashboardController extends Controller
         //   $idd = request('employee', optional($sales_emp->first())->id);
 
         $login_employee = OfficeEmployees::find($idd);
-     
+
 
 
         if (isset($_GET['filter_by_month']) && $_GET['filter_by_month'] != '') {
@@ -66,7 +66,11 @@ class DashboardController extends Controller
             'data'   => [$completed_tasks, $in_progress, $pending_tasks],
         ];
 
-        return view('admin.dashboard.index', compact('leads', 'login_employee', 'monthlyTarget', 'all_leads', 'sales_emp', 'total_tasks', 'completed_tasks', 'in_progress', 'pending_tasks', 'taskChart', 'active_emp', 'Inactive_emp','online','offline'));
-        
+        $sales = [12000, 15000, 14000, 18000, 20000, 23000, 26000, 25000, 27000, 29000, 31000, 33000];
+        // dd($sales);
+        $revenue = [9000, 11000, 10500, 14000, 15000, 17000, 19000, 18000, 20000, 21000, 22000, 24000];
+
+
+        return view('admin.dashboard.index', compact('leads', 'login_employee', 'monthlyTarget', 'all_leads', 'sales_emp', 'total_tasks', 'completed_tasks', 'in_progress', 'pending_tasks', 'taskChart', 'active_emp', 'Inactive_emp', 'online', 'offline','sales','revenue'));
     }
 }

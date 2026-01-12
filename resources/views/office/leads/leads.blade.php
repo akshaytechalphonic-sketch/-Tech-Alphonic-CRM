@@ -185,7 +185,7 @@
                 </div>
 
                 <div class="dash-tabs-filter multi-btns d-flex gap-3">
-                    {{-- <div class="create-client-btn active d-flex">
+                    <div class="create-client-btn active d-flex">
                         <a href="#!" class="d-flex align-items-center gap-2 me-2" data-bs-toggle="modal"
                             data-bs-target="#meetingsScheduleModal">
 
@@ -193,7 +193,7 @@
 
                             Schedule Meeting
                         </a>
-                    </div> --}}
+                    </div>
                     @auth('office_employees')
                         @php
                             $employee = auth('office_employees')->user();
