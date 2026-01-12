@@ -13,7 +13,7 @@
         <div class="dash-tabs d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex">
                 <form class="nav nav-pills" id="pills-tab" role="tablist">
-                    @php
+                    {{-- @php
                         $authEmployee = Auth::guard('office_employee')->user();
                     @endphp
                     @if (in_array($authEmployee->role_id, [1, 2, 4]))
@@ -30,7 +30,7 @@
                                 @endforeach
                             </select>
                         </li>
-                    @endif
+                    @endif --}}
                     <li class="nav-item" role="presentation">
                         <select class="form-select rounded-pill" aria-label="Default select example"
                             onchange="this.form.submit()" name="status" required>
