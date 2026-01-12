@@ -40,7 +40,43 @@ class DashboardController extends Controller
             // dd($month, $year);
             $monthlyTarget = OfficeSaleTargets::where('emp_id', $login_employee->id ?? '')->where('year', $year)->whereNotNull($month)->first();
         } else {
+            $year = date('Y');
+            $months = [
+                'jan',
+                'feb',
+                'mar',
+                'apr',
+                'may',
+                'jun',
+                'jul',
+                'aug',
+                'sep',
+                'oct',
+                'nov',
+                'dec'
+            ];
+
+            // Initialize monthly sales array
+            $monthlySales = array_fill(0, 12, 0);
             $monthlyTarget = OfficeSaleTargets::where('emp_id', $login_employee->id ?? '')->where('year', date('Y'))->whereNotNull(strtolower(date('M')))->first();
+
+            $targets = OfficeSaleTargets::where('year', $year)->get();
+            foreach ($targets as $target) {
+
+                foreach ($months as $index => $month) {
+
+                    if (!empty($target->$month)) {
+
+                        $monthData = json_decode($target->$month, true);
+
+                        if (is_array($monthData)) {
+                            foreach ($monthData as $dayData) {
+                                $monthlySales[$index] += (int) ($dayData['recived_amount'] ?? 0);
+                            }
+                        }
+                    }
+                }
+            }
         }
         $leads = OfficeLeads::where('trash', false)->where('emp_id', $login_employee->id ?? '')->where('assign_date', date('Y-m-d'))->get();
         $all_leads = OfficeLeads::where('trash', false)->where('emp_id', $login_employee->id ?? '')->get();
@@ -48,6 +84,7 @@ class DashboardController extends Controller
         // dd($officeLeadsFolders);
         $month = strtolower(date('M'));
         $monthlyTarget = $monthlyTarget != null ? json_decode($monthlyTarget->$month, true) : null;
+
 
 
         // ================= TASK REPORT ======================
@@ -71,6 +108,6 @@ class DashboardController extends Controller
         $revenue = [9000, 11000, 10500, 14000, 15000, 17000, 19000, 18000, 20000, 21000, 22000, 24000];
 
 
-        return view('admin.dashboard.index', compact('leads', 'login_employee', 'monthlyTarget', 'all_leads', 'sales_emp', 'total_tasks', 'completed_tasks', 'in_progress', 'pending_tasks', 'taskChart', 'active_emp', 'Inactive_emp', 'online', 'offline','sales','revenue'));
+        return view('admin.dashboard.index', compact('leads', 'login_employee', 'monthlyTarget', 'all_leads', 'sales_emp', 'total_tasks', 'completed_tasks', 'in_progress', 'pending_tasks', 'taskChart', 'active_emp', 'Inactive_emp', 'online', 'offline', 'sales', 'revenue','monthlySales'));
     }
 }

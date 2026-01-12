@@ -23,15 +23,15 @@
                      <div class="col-md-4 bg-light text-center p-4 border-end">
     <h6 class="mb-3 fw-semibold">Profile Preview</h6>
 
-    <div class="mb-3">
+    <div class="mb-3 " style=" width: 100%; max-width: 200px; margin: auto; height: 100%; max-height: 200px;">
         @if(Auth::guard('office_employees')->user()->profile_image)
             <img src="{{ asset('public/uploads/profile/' . Auth::guard('office_employees')->user()->profile_image) }}"
                  class="rounded-circle shadow"
-                 width="150" height="150">
+                 style="height: 100%; width: 100%;">
         @else
             <img src="{{ asset('public/admin/assets/images/user.png') }}"
                  class="rounded-circle shadow"
-                 width="150" height="150">
+                 style="height: 100%; width: 100%;">
         @endif
     </div>
 

@@ -422,42 +422,42 @@
 
 
                     {{-- <div class="row mb-4"> --}}
-                        <div class="col-lg-3 mb-3">
-                            <a href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}">
-                                <div class="card p-3 text-center">
-                                    <h6>Total Tasks</h6>
-                                    <h3>{{ $total_tasks }}</h3>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-lg-3 mb-3">
-                            <a
-                                href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}&status={{ 'completed' }}">
-                                <div class="card p-3 text-center">
-                                    <h6>Completed</h6>
-                                    <h3 class="text-success">{{ $completed_tasks }}</h3>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-lg-3 mb-3">
-                            <a
-                                href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}&status={{ 'in_progress' }}">
-                                <div class="card p-3 text-center">
-                                    <h6>In Progress</h6>
-                                    <h3 class="text-warning">{{ $in_progress }}</h3>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-lg-3 mb-3">
-                            <a
-                                href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}&status={{ 'review' }}">
+                    <div class="col-lg-3 mb-3">
+                        <a href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}">
+                            <div class="card p-3 text-center">
+                                <h6>Total Tasks</h6>
+                                <h3>{{ $total_tasks }}</h3>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 mb-3">
+                        <a
+                            href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}&status={{ 'completed' }}">
+                            <div class="card p-3 text-center">
+                                <h6>Completed</h6>
+                                <h3 class="text-success">{{ $completed_tasks }}</h3>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 mb-3">
+                        <a
+                            href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}&status={{ 'in_progress' }}">
+                            <div class="card p-3 text-center">
+                                <h6>In Progress</h6>
+                                <h3 class="text-warning">{{ $in_progress }}</h3>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-lg-3 mb-3">
+                        <a
+                            href="{{ route('admin.task_management.index') }}?employee={{ $_GET['employee'] }}&status={{ 'review' }}">
 
-                                <div class="card p-3 text-center">
-                                    <h6>Pending</h6>
-                                    <h3 class="text-danger">{{ $pending_tasks }}</h3>
-                                </div>
-                            </a>
-                        </div>
+                            <div class="card p-3 text-center">
+                                <h6>Pending</h6>
+                                <h3 class="text-danger">{{ $pending_tasks }}</h3>
+                            </div>
+                        </a>
+                    </div>
                     {{-- </div> --}}
 
                 </div>
@@ -591,7 +591,6 @@
 
 
     @push('custom-js')
-   
         <script>
             // $(function() {
             //     $('input[name="filter_by_month"]').daterangepicker({
@@ -630,8 +629,8 @@
 
         <script>
             const ctx = document.getElementById('salesOverviewChart').getContext('2d');
-             const salesData = @json($sales);
-        const revenueData = @json($revenue);
+            const salesData = @json($monthlySales);
+            const revenueData = @json($revenue);
             new Chart(ctx, {
                 type: 'line',
                 data: {

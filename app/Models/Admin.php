@@ -36,6 +36,7 @@ class Admin extends Model implements Authenticatable
         'email_verified_at',
         'role_id',
         'remember_token',
+        'profile_image'
     ];
 
 
