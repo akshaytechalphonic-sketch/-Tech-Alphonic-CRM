@@ -16,7 +16,7 @@
                     @php
                         $authEmployee = Auth::guard('admin')->user();
                     @endphp
-                    @if (in_array($authEmployee->role_id, [1, 2, 4,3]))
+                    {{-- @if (in_array($authEmployee->role_id, [1, 2, 4,3]))
                         <li class="nav-item me-2" role="presentation">
                             <select class="form-select rounded-pill text-capitalize" aria-label="Default select example"
                                 name="employee" onchange="this.form.submit()" required>
@@ -30,7 +30,7 @@
                                 @endforeach
                             </select>
                         </li>
-                    @endif
+                    @endif --}}
                     <li class="nav-item" role="presentation">
                         <select class="form-select rounded-pill" aria-label="Default select example"
                             onchange="this.form.submit()" name="status" required>
