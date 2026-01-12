@@ -122,8 +122,8 @@
                                             <td>{{ $project->deadline }}</td>
 
                                             <td>
-            
-                                                    {{  $project->status }}          
+
+                                                {{ $project->status }}
                                             </td>
                                             <td>
                                                 <ul class="action-icons d-flex list-unstyled gap-2 mb-0">
@@ -153,6 +153,7 @@
                                                             data-start="{{ $project->start_date }}"
                                                             data-deadline="{{ $project->deadline }}"
                                                             data-description="{{ $project->description }}"
+                                                            data-department_id="{{ $project->department_id }}"
                                                             data-status="{{ $project->status }}">
                                                             <span class="iconify" data-icon="solar:pen-outline"
                                                                 style="font-size:24px;"></span>
@@ -245,16 +246,31 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label">Project Lead</label>
+                            <label class="col-sm-3 col-form-label">Select Department</label>
                             <div class="col-sm-9">
-                                <select name="project_manager_id" class="form-control">
+                                <select name="department_id" class="form-control" id="department_id">
                                     <option value="">Select One</option>
-                                    @foreach ($managers as $manager)
-                                        <option value="{{ $manager->id }}">{{ $manager->name }}</option>
+                                    @foreach ($departments as $department)
+                                        <option value="{{ $department->id }}">{{ $department->department_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Project Lead</label>
+                            <div class="col-sm-9">
+                                {{-- <select name="project_manager_id" class="form-control" id="employee_id">
+                                    <option value="">Select One</option>
+                                    @foreach ($managers as $manager)
+                                        <option value="{{ $manager->id }}">{{ $manager->name }}</option>
+                                    @endforeach
+                                </select> --}}
+                                <select id="employee_id" name="project_manager_id" class="form-select">
+                                    <option value="">Select Employee</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="row mb-3">
                             <label class="col-sm-3 col-form-label">Description</label>
                             <div class="col-sm-9">
@@ -329,14 +345,34 @@
                                 <input type="date" id="edit_deadline" name="deadline" class="form-control">
                             </div>
                         </div>
-
                         <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Select Department</label>
+                            <div class="col-sm-9">
+                                <select name="department_id" class="form-control" id="edit_department_id">
+                                    <option value="">Select One</option>
+                                    @foreach ($departments as $department)
+                                        <option value="{{ $department->id }}">
+                                            {{ $department->department_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        {{-- <div class="row mb-3">
                             <label class="col-sm-3 col-form-label">Project Lead</label>
                             <div class="col-sm-9">
                                 <select id="edit_project_manager" name="project_manager_id" class="form-control">
                                     @foreach ($managers as $manager)
                                         <option value="{{ $manager->id }}">{{ $manager->name }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+                        </div> --}}
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Project Lead</label>
+                            <div class="col-sm-9">
+                                <select id="edit_project_manager" name="project_manager_id" class="form-control">
+                                    <option value="">Select Employee</option>
                                 </select>
                             </div>
                         </div>
@@ -364,7 +400,7 @@
     </div>
 
     @push('custom-js')
-        <script>
+        {{-- <script>
             $('.edit-project-btn').on('click', function() {
 
                 let id = $(this).data('id');
@@ -376,6 +412,7 @@
                 $('#edit_deadline').val($(this).data('deadline'));
                 $('#edit_project_manager').val($(this).data('manager'));
                 $('#description').val($(this).data('description'));
+                 $('#edit_department_id').val(departmentId);
 
                 // Correct form route
                 let url = "{{ route('admin.projects.update', ':id') }}";
@@ -386,6 +423,116 @@
 
                 // Show modal
                 $('#editProjectModal').modal('show');
+            });
+        </script> --}}
+
+
+        <script>
+            $('.edit-project-btn').on('click', function() {
+
+                let id = $(this).data('id');
+                let departmentId = $(this).data('department_id');
+                let managerId = $(this).data('manager');
+
+                // Fill modal fields
+                $('#edit_project_name').val($(this).data('name'));
+                $('#edit_client_name').val($(this).data('client'));
+                $('#edit_start_date').val($(this).data('start'));
+                $('#edit_deadline').val($(this).data('deadline'));
+                $('#description').val($(this).data('description'));
+
+                // Set department
+                $('#edit_department_id').val(departmentId);
+
+                // Set form action
+                let url = "{{ route('admin.projects.update', ':id') }}";
+                $('#editProjectForm').attr('action', url.replace(':id', id));
+
+                // Load employees based on department
+                loadEditEmployees(departmentId, managerId);
+
+                $('#editProjectModal').modal('show');
+            });
+
+            function loadEditEmployees(departmentId, selectedEmployee = null) {
+
+                let employeeSelect = $('#edit_project_manager');
+
+                if (!departmentId) {
+                    employeeSelect.html('<option value="">Select Employee</option>');
+                    return;
+                }
+
+                employeeSelect.html('<option>Loading...</option>');
+
+                fetch(`{{ url('admin/projects/get-employee') }}/${departmentId}`)
+                    .then(res => res.json())
+                    .then(data => {
+
+                        employeeSelect.html('<option value="">Select Employee</option>');
+
+                        if (data.length === 0) {
+                            employeeSelect.html('<option value="">No Employees Found</option>');
+                            return;
+                        }
+
+                        data.forEach(emp => {
+                            let selected = emp.id == selectedEmployee ? 'selected' : '';
+                            employeeSelect.append(`
+                        <option value="${emp.id}" ${selected} data-salesemp="${emp.is_sales}">
+                            ${emp.name} (${emp.designation_name})
+                        </option>
+                    `);
+                        });
+                    })
+                    .catch(err => {
+                        employeeSelect.html('<option>Error loading employees</option>');
+                        console.error(err);
+                    });
+            }
+
+            // When department is changed manually in edit modal
+            $('#edit_department_id').on('change', function() {
+                loadEditEmployees(this.value);
+            });
+        </script>
+
+        <script>
+            document.getElementById('department_id').addEventListener('change', function() {
+
+                let deptId = this.value;
+                let employeeSelect = document.getElementById('employee_id');
+
+                if (!deptId) {
+                    employeeSelect.innerHTML = '<option value="">Select Employee</option>';
+                    return;
+                }
+
+                employeeSelect.innerHTML = '<option>Loading...</option>';
+
+                fetch(`{{ url('admin/projects/get-employee') }}/${deptId}`)
+                    .then(res => res.json())
+                    .then(data => {
+
+                        employeeSelect.innerHTML = '<option value="">Select Employee</option>';
+
+                        if (data.length === 0) {
+                            employeeSelect.innerHTML = '<option value="">No Employees Found</option>';
+                            return;
+                        }
+
+                        data.forEach(emp => {
+                            employeeSelect.innerHTML += `
+                    <option value="${emp.id}" data-salesemp="${emp.is_sales}">
+                        ${emp.name} (${emp.designation_name})
+                    </option>
+                `;
+                        });
+                    })
+                    .catch(err => {
+                        employeeSelect.innerHTML = '<option>Error loading employees</option>';
+                        console.error(err);
+                    });
             });
         </script>
     @endpush

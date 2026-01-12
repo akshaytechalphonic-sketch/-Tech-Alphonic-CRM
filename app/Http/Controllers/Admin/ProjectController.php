@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\OfficeDepartments;
 use App\Models\OfficeTask;
 use App\Models\OfficeEmployees;
 use App\Models\OfficeDesignations;
@@ -19,19 +20,21 @@ class ProjectController extends Controller
     public function index()
     {
         $projects = Project::with(['department', 'manager'])->latest()->get();
+        $departments=OfficeDepartments::active()->get();
         $managers = OfficeEmployees::get();
 
-
-        return view('admin.office.project_management', compact('projects', 'managers'));
+        return view('admin.office.project_management', compact('projects', 'managers','departments'));
     }
 
     public function store(Request $request)
     {
 
+
+       
         $request->validate([
             'project_name' => 'required|string|max:255',
             'client_name' => 'required|string|max:255',
-            // 'project_manager_id' => 'required|integer',
+            'department_id' => 'required|integer',
             // 'team_id' => 'required|integer',
             'start_date' => 'nullable|date',
             'deadline' => 'nullable|date',
@@ -53,6 +56,7 @@ class ProjectController extends Controller
         // Validate incoming data
         $validatedData = $request->validate([
             'project_name' => 'required|string|max:255',
+            'department_id' => 'required|integer',
             'client_name' => 'required|string|max:255',
             'start_date' => 'required|date',
             'project_manager_id' => 'nullable|integer',
@@ -67,6 +71,9 @@ class ProjectController extends Controller
         $project->start_date = $validatedData['start_date'];
         $project->deadline = $validatedData['deadline'];
         $project->description = $validatedData['description'];
+        $project->department_id = $validatedData['department_id'];
+
+        
 
         // Save the project
         $project->save();
@@ -186,5 +193,26 @@ class ProjectController extends Controller
 
     return back()->with('success', 'Project status updated successfully!');
 }
+
+
+  public function departmentEmployee($departmentId)
+    {
+        return OfficeEmployees::whereHas('designation', function ($q) use ($departmentId) {
+            $q->where('department_id', $departmentId);
+        })
+            ->with(['designation.department'])
+            ->get()
+            ->map(function ($emp) {
+                return [
+                    'id'               => $emp->id,
+                    'name'             => $emp->name,
+                    'email'            => $emp->email,
+                    'designation_id'   => $emp->designation_id,
+                    'designation_name' => $emp->designation->designation_name ?? null,
+                    'department_name'  => $emp->designation->department->department_name ?? null,
+                    'is_sales'         => ($emp->designation->department->department_name ?? '') === 'Sales' ? 1 : 0,
+                ];
+            });
+    }
 
 }

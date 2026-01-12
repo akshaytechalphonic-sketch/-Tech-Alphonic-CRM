@@ -134,6 +134,8 @@ Route::middleware(['auth:admin'])->group(function () {
             Route::post('/update/{id}', 'update')->name('update');
             Route::any('/detail/{id}', 'detail')->name('detail');
             Route::post('/update-status/{id}', 'updateStatus')->name('updateStatus');
+            Route::get('/get-employee/{department}', 'departmentEmployee')->name('employee');
+
         });
 
         Route::prefix('office-task-management')->name('task_management.')->controller(MyOfficeTaskController::class)->group(function () {

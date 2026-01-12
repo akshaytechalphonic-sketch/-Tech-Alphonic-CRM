@@ -15,6 +15,7 @@ class Project extends Model
         'deadline',
         'status',
         'description',
+        'department_id'
     ];
 
 
