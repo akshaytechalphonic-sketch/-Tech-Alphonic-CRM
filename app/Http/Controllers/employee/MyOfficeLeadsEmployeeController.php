@@ -102,7 +102,10 @@ class MyOfficeLeadsEmployeeController extends Controller
         })->get();
 
         // Seniors → Only Manager + Team Lead
-        $seniors = OfficeEmployees::whereIn('role_id', [2, 4])->get();
+        $seniors = OfficeEmployees::whereIn('role_id', [2, 4])
+        ->where('id','!=','9')
+        
+        ->get();
 
         $lead_folders = OfficeLeadsFolders::all();
         $clients = $leads;
