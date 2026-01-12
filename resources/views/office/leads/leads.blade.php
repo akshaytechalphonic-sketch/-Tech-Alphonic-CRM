@@ -185,13 +185,16 @@
                 </div>
 
                 <div class="dash-tabs-filter multi-btns d-flex gap-3">
-                     <div class="create-client-btn active d-flex">
-                                <a href="{{ route('meetings.redirectToGoogle') }}"
-                                    class="d-flex align-items-center gap-2 me-2">
-                                    <img src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt="">
-                                    Connect Google Calendar
-                                </a>
-                            </div>
+                    {{-- <div class="create-client-btn active d-flex">
+                        <a href="#!" class="d-flex align-items-center gap-2 me-2" data-bs-toggle="modal"
+                            data-bs-target="#meetingsScheduleModal">
+
+                            <img src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt="">
+
+                            
+                            Schedule Meeting
+                        </a>
+                    </div> --}}
                     @auth('office_employees')
                         @php
                             $employee = auth('office_employees')->user();
