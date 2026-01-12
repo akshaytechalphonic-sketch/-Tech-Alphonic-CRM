@@ -47,20 +47,57 @@ class MeetingController extends Controller
     //     return view('meetings.index', compact('meetings'));
     // }
 
-     public function index()
-    {
-        $now = Carbon::now('Asia/Kolkata');
-        $meetings = Meeting::when(isset($_GET['employee']) && $_GET['employee'] != null, fn($q) => $q->where('created_by', $_GET['employee']))
-            ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
-            ->when(isset($_GET['date']) && $_GET['date'] != null,  fn($q) => $q->where('date', $_GET['date']))
-            ->orderBy('id', 'DESC')
-            ->with('employee')
-            ->get();
-         $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
-            $query->where('department_name', 'Sales');
-        })->with(['designation', 'designation.department'])->get();
-           return view('meetings.index', compact('meetings','sales_emp'));
-    }
+    //  public function index()
+    // {
+    //     $now = Carbon::now('Asia/Kolkata');
+    //     $meetings = Meeting::when(isset($_GET['employee']) && $_GET['employee'] != null, fn($q) => $q->where('created_by', $_GET['employee']))
+    //         ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
+    //         ->when(isset($_GET['date']) && $_GET['date'] != null,  fn($q) => $q->where('date', $_GET['date']))
+    //         ->orderBy('id', 'DESC')
+    //         ->with('employee')
+    //         ->get();
+    //      $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
+    //         $query->where('department_name', 'Sales');
+    //     })->with(['designation', 'designation.department'])->get();
+    //        return view('meetings.index', compact('meetings','sales_emp'));
+    // }
+
+    public function index(Request $request)
+{
+    $now = Carbon::now('Asia/Kolkata');
+    $authEmployee = Auth::guard('office_employees')->user();
+
+    $meetings = Meeting::query()
+
+        // 🔒 If role_id = 3 → only own meetings
+        ->when($authEmployee->role_id == 3, function ($q) use ($authEmployee) {
+            $q->where('created_by', $authEmployee->id);
+        })
+
+        // 👨‍💼 Other roles can filter by employee
+        ->when(
+            $authEmployee->role_id != 3 && $request->filled('employee'),
+            fn($q) => $q->where('created_by', $request->employee)
+        )
+
+        ->when($request->filled('status'),
+            fn($q) => $q->where('status', $request->status)
+        )
+
+        ->when($request->filled('date'),
+            fn($q) => $q->where('date', $request->date)
+        )
+
+        ->orderByDesc('id')
+        ->with('employee')
+        ->get();
+
+    $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
+        $query->where('department_name', 'Sales');
+    })->with(['designation', 'designation.department'])->get();
+
+    return view('meetings.index', compact('meetings', 'sales_emp'));
+}
 
 
     public function scheduleMeeting(Request $request)
