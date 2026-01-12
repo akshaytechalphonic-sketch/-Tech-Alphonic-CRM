@@ -191,7 +191,6 @@
 
                             <img src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt="">
 
-                            
                             Schedule Meeting
                         </a>
                     </div> --}}
