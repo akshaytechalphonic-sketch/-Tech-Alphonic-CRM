@@ -103,11 +103,11 @@
 
                     <div class="create-client-btn active d-flex ">
 
-                        <a href="{{ route('admin.leads.uploaded_excels')}}" class="btn btn-sm me-2 " >  Back
-                            </a>
+                        <a href="{{ route('admin.leads.uploaded_excels') }}" class="btn btn-sm me-2 "> Back
+                        </a>
 
                     </div>
-                </div> 
+                </div>
             </div>
             <div class="dash-tabs-content no-scrollbar">
                 <div class="tab-content" id="pills-tabContent">
@@ -125,8 +125,8 @@
                                         <th>Client Name</th>
                                         <th>Client Phone</th>
                                         <th>Client Email</th>
-                                        <th>Created At</th>
                                         <th>Ramarks</th>
+                                        <th>Created At</th>
                                         <th>Status</th>
                                         {{-- <th>Action</th> --}}
                                     </tr>
@@ -134,10 +134,10 @@
 
                                 <tbody>
                                     {{-- {{dd($leads->employee)}} --}}
-                                    @foreach ($excelleads as $index => $item)
+                                    {{-- @foreach ($excelleads as $index => $item)
                                         <tr>
                                             <td></td>
-                                            {{-- <td>{{ $index + 1 }}</td> --}}
+                                           
                                             <td>{{ $item->excel_row_no }}</td>
 
                                             <td>{{ $item->raw_json['client_name'] ?? ''}}</td>
@@ -147,7 +147,7 @@
                                              <td>{{ $item->created_at}}</td>
                                             <td>{{ $item->raw_json['description'] ?? ''}}</td>
                                             <td>
-                                                @if($item->is_assigned=='1')
+                                                @if ($item->is_assigned == '1')
                                                 <span class="badge succes-bg text-capitalize">Assigned</span>
                                                 
                                                 @else
@@ -157,20 +157,42 @@
 
                                         
                                             </td>
-                                              {{-- <td>
-                                              <ul class="action-icons edit d-flex list-unstyled gap-2 mb-0">
-                                                    <li>
-                                                        <a href="javascript:void(0)"
-                                                            onclick="openDistributeModal({{ $item->id }},{{ $item->total_rows }})"
-                                                            title="Distribute">
-                                                            <span class="iconify" data-icon="mdi:share-variant"
-                                                                style="font-size: 24px;"></span>
-                                                        </a>
-                                                    </li>
-                                                </ul> 
-                                            </td>--}}
+                                            
+                                        </tr>
+                                    @endforeach --}}
+                                    @foreach ($excelleads as $index => $item)
+                                        @php
+                                            // Make raw_json safe
+                                            $data = is_array($item->raw_json)
+                                                ? $item->raw_json
+                                                : json_decode($item->raw_json, true);
+                                        @endphp
+
+                                        <tr>
+                                            <td></td>
+                                           
+                                            <td>{{ $item->excel_row_no }}</td>
+                                            <td>{{ $data['service_name'] ?? '' }}</td>
+                                             <td>{{ $data['client_name'] ?? '' }}</td>
+                                    
+                                            <td>{{ $data['client_mobile'] ?? '' }}</td>
+                                            <td>{{ $data['client_email'] ?? '' }}</td>
+                                            <td>{{ $data['description'] ?? '' }}</td>
+
+                                            <td>{{ $item->created_at->format('d-m-Y H:i') }}</td>
+
+                                            <td>
+                                                  @if ($item->is_assigned == '1')
+                                                <span class="badge succes-bg text-capitalize">Assigned</span>
+                                                
+                                                @else
+                                                <span class="badge danger-bg text-capitalize">Unassigned</span>
+                                                
+                                                @endif
+                                            </td>
                                         </tr>
                                     @endforeach
+
                                 </tbody>
                             </table>
                         </div>
@@ -194,11 +216,9 @@
 
     <div class="search-box-mob">
         <div class="close-search-bar">
-            <img width="30" height="30" src="https://img.icons8.com/ios/30/close-window.png"
-                alt="close-window" />
+            <img width="30" height="30" src="https://img.icons8.com/ios/30/close-window.png" alt="close-window" />
         </div>
 
         @push('custom-js')
-          
         @endpush
     @endsection

@@ -277,8 +277,8 @@ class MyOfficeLeadsEmployeeController extends Controller
                 $createMonth->update();
             }
         }
-
-        return redirect()->back();
+            return redirect()->route('office_employee.leads.index')->with('succuss', 'Remarks updated Succesfully.');
+        // return redirect()->back();
     }
 
     public function create_folder(Request $request)
