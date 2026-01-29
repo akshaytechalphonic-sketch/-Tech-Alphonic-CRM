@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use App\Notification\LeadAssignedNotification;
 
 class MyOfficeLeadsController extends Controller
 {
@@ -40,7 +41,9 @@ class MyOfficeLeadsController extends Controller
 
     public function create_lead(Request $request)
     {
-        // dd($request->all());
+      
+        $login_employee = OfficeEmployees::where('id',$request->emp_id)->first();
+        // dd($login_employee);
         $addlead = new OfficeLeads;
         $addlead->emp_id = $request->emp_id;
         $addlead->service_name = $request->service_name;
@@ -54,6 +57,8 @@ class MyOfficeLeadsController extends Controller
         $addlead->folder_id = $request->folder_id;
         $addlead->remark = json_encode([['remark' => $request->remark, 'date' => date('Y-m-d'), 'time' => date('h:i A'), 'status' => $request->status]]);
         $addlead->save();
+
+        // $login_employee->notify(new LeadAssignedNotification($addlead));
         return redirect()->back()->with('success', 'Lead Added Successfully!');
     }
     public function single_lead($id)
@@ -97,6 +102,7 @@ class MyOfficeLeadsController extends Controller
     }
     public function single_folder($slug)
     {
+        
         $single_folder = OfficeLeadsFolders::where('slug', $slug)->first();
 
         $lead_folders = OfficeLeadsFolders::all();
@@ -121,6 +127,9 @@ class MyOfficeLeadsController extends Controller
         $sales_emp_folder = OfficeEmployees::whereIn('id', $single_folder_json)->whereHas('designation.department', function ($query) {
             $query->where('department_name', 'Sales');
         })->with(['designation', 'designation.department'])->get();
+
+
+       
 
         return view('admin.office.single-lead-folder', compact('lead_folders', 'leads', 'slug', 'sales_emp', 'single_folder', 'sales_emp_folder'));
     }

@@ -160,7 +160,7 @@ class MyOfficeLeadsIntegrationController extends Controller
     Log::info('hub_challenge: ' . $hubChallenge);
     Log::info('hub_verify_token: ' . $hubVerifyToken);
 
-    if ($hubVerifyToken === 'meatyhamhock') {
+    if ($hubVerifyToken === 'meta_verify_2026') {
         Log::info('Verification successful');  // Log verification success
 
         $addint = new OfficeIndiamartLeads;

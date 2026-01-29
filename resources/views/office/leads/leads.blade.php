@@ -332,11 +332,13 @@
                                                                 class="iconify" data-icon="iconoir:trash"
                                                                 data-inline="false" style="font-size: 24px;"></span></a>
                                                     </li>
+                                                      @if (Auth::guard('office_employees')->user()->role_id != 2)
                                                     <li><a
                                                             href="{{ route('office_employee.leads.single_lead', ['id' => $lead->id]) }}"><span
                                                                 class="iconify" data-icon="basil:eye-outline"
                                                                 data-inline="false" style="font-size: 24px;"></span></a>
                                                     </li>
+                                                    @endif
                                                 </ul>
                                             </td>
                                         </tr>

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Notification\LeadAssignedNotification;
 
 class MyOfficeLeadsEmployeeController extends Controller
 {
@@ -38,6 +39,7 @@ class MyOfficeLeadsEmployeeController extends Controller
 
     public function index()
     {
+        
         $login_employee = Auth::guard('office_employees')->user();
 
         $leads = OfficeLeads::where('trash', false)
@@ -120,7 +122,9 @@ class MyOfficeLeadsEmployeeController extends Controller
 
     public function create_lead(Request $request)
     {
+       
         $login_employee = Auth::guard('office_employees')->user();
+        
 
         $addlead = new OfficeLeads;
         $addlead->emp_id = $login_employee->id;
@@ -163,7 +167,8 @@ class MyOfficeLeadsEmployeeController extends Controller
             }
         }
         //end check storage
-
+        
+        // $login_employee->notify(new LeadAssignedNotification($addlead));
         return redirect()->back()->with('success', 'Lead Added Successfully!');
     }
     // public function single_lead($id)
@@ -321,6 +326,7 @@ class MyOfficeLeadsEmployeeController extends Controller
 
     public function single_folder($slug)
     {
+        
         $login_employee = Auth::guard('office_employees')->user();
 
         $single_folder = OfficeLeadsFolders::where('slug', $slug)->firstOrFail();

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\Mail\MeetingReminderMail;
 use App\Models\OfficeLeadFollowups;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
@@ -30,4 +31,33 @@ class NotificationController extends Controller
             }
         }
     }
+
+
+    // public function read($id)
+    // {
+    //     $employee = Auth::guard('office_employees')->user();
+
+    //     $notification = $employee->notifications()->where('id', $id)->first();
+
+    //     if ($notification) {
+    //         $notification->markAsRead();
+    //     }
+
+    //     return redirect()->route(
+    //         'office_employee.leads.single_lead',
+    //         $notification->data['lead_id'] ?? null
+    //     );
+    // }
+
+
+    public function readAll()
+    {
+        $employee = Auth::guard('office_employees')->user();
+
+        // ✅ Mark all unread notifications as read
+        $employee->unreadNotifications->markAsRead();
+
+        return redirect()->back()->with('success', 'All notifications marked as read');
+    }
+
 }

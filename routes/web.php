@@ -32,6 +32,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\employee\EmployeeProfileController;
 use App\Http\Controllers\employee\EmployeesController;
+use App\Http\Controllers\NotificationController;
+
 
 
 /*
@@ -249,6 +251,11 @@ Route::middleware(['office_employee'])->group(function () {
             Route::get('/trash/{id}', 'trash')->name('trash');
             Route::post('/followup/{lead_id}', 'followup')->name('followup');
         });
+        
+        Route::get('notification/read/{id}',[NotificationController::class, 'read'])->name('notification.read');
+        Route::post('notifications/read-all',[NotificationController::class, 'readAll'])->name('notifications.readAll');
+
+
         Route::prefix('chats')->name('chats.')->controller(MyOfficeChatsEmployeeController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::any('/{emp_base64}', 'singleChat')->name('singleChat');

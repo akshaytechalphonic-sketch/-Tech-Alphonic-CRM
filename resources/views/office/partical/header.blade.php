@@ -60,12 +60,16 @@
             </div>
             <div class="header-right d-flex align-items-center gap-4">
                 @php
+                    $employee = auth()->guard('office_employees')->user();
                     $followups = \App\Models\OfficeLeadFollowups::with('employee')
                         ->where('date', date('Y-m-d'))
                         ->where('time', '>=', date('H:i:s'))
                         ->where('active', 1)
                         ->where('emp_id', auth()->guard('office_employees')->user()->id)
                         ->get();
+                    $notifications = $employee->unreadNotifications;
+                    $totalNotifications = $followups->count() + $notifications->count();
+
                 @endphp
 
                 <div class="dropdown">
@@ -73,10 +77,35 @@
                         aria-expanded="false">
                         <img src="{{ asset('public/admin/assets/images/icons/notification-icon.png') }}"
                             alt="" />
-                        <div class="notification-indication">{{ $followups->count() }}</div>
+                        <div class="notification-indication">{{ $totalNotifications }}</div>
                     </div>
 
                     <ul class="dropdown-menu">
+                        @if ($notifications->count() > 0)
+                            <li class="text-end ">
+                                <form action="{{ route('office_employee.notifications.readAll') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-link">
+                                        Mark all as read
+                                    </button>
+                                </form>
+                            </li>
+                        @endif
+
+                        @forelse ($notifications as $notification)
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('office_employee.leads.single_lead', $notification->data['lead_id'] ?? '') }}">
+                                    <strong>{{ $notification->data['title'] ?? 'New Notification' }}</strong><br>
+                                    {{ $notification->data['message'] ?? '' }}
+                                    <small class="text-muted d-block">
+                                        {{ $notification->created_at->diffForHumans() }}
+                                    </small>
+                                </a>
+                            </li>
+                        @empty
+                        @endforelse
+
                         @forelse ($followups as $fups)
                             <li>
                                 <a class="dropdown-item"
@@ -98,12 +127,11 @@
                         data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
 
                         <div class="profile-img">
-                             @if(Auth::guard('office_employees')->user()->profile_image)
-
-                             <img src="{{ asset('public/uploads/profile/' . Auth::guard('office_employees')->user()->profile_image) }}" alt="" />
-                             @else
-                             <img src="{{ asset('public/admin/assets/images/user.png') }}" alt="" />
-
+                            @if (Auth::guard('office_employees')->user()->profile_image)
+                                <img src="{{ asset('public/uploads/profile/' . Auth::guard('office_employees')->user()->profile_image) }}"
+                                    alt="" />
+                            @else
+                                <img src="{{ asset('public/admin/assets/images/user.png') }}" alt="" />
                             @endif
                         </div>
 
@@ -164,16 +192,16 @@
                                 style="display: {{ Request::is('office-employee/leads') || Request::is('office-employee/chats') || Request::is('office-employee/meetings') || Request::is('office-employee/department') || Request::is('office-employee/task-management*') ? 'block' : 'none' }};">
 
                                 <ul>
-                                    
-                                   @if(Auth::guard('office_employees')->user()->role_id != 3)
-                                    <li class="dropdown-item-sidebar">
-                                        <a href="{{ route('office_employee.department.employee.index') }}"
-                                            class="{{ Request::is('office-employee/department') ? 'active' : '' }}">
-                                            <img src="{{ asset('public/admin/assets/images/icons/users.png') }}"
-                                                alt="">
-                                            <span class="item-name">Departments Employee</span>
-                                        </a>
-                                    </li>
+
+                                    @if (Auth::guard('office_employees')->user()->role_id != 3)
+                                        <li class="dropdown-item-sidebar">
+                                            <a href="{{ route('office_employee.department.employee.index') }}"
+                                                class="{{ Request::is('office-employee/department') ? 'active' : '' }}">
+                                                <img src="{{ asset('public/admin/assets/images/icons/users.png') }}"
+                                                    alt="">
+                                                <span class="item-name">Departments Employee</span>
+                                            </a>
+                                        </li>
                                     @endif
 
                                     <li class="dropdown-item-sidebar">

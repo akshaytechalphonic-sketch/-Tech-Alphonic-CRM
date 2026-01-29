@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable; // Import Authenticatable
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
 
 class OfficeEmployees extends Authenticatable  // Extend Authenticatable
 {
-    use HasFactory;
+    use Notifiable, HasFactory;
 
     // protected $guard="office_employees";
     protected $fillable = [
