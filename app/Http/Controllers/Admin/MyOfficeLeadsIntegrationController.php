@@ -154,33 +154,59 @@ class MyOfficeLeadsIntegrationController extends Controller
     }
 
 
-    public function facebook_webhook(Request $request){
-        Log::info('Received Webhook Request', $request->all());
+    // public function facebook_webhook(Request $request){
+    //     Log::info('Received Webhook Request', $request->all());
 
-    $hubMode = $request->get('hub_mode');
-    $hubChallenge = $request->get('hub_challenge');
-    $hubVerifyToken = $request->get('hub_verify_token');
+    // $hubMode = $request->get('hub_mode');
+    // $hubChallenge = $request->get('hub_challenge');
+    // $hubVerifyToken = $request->get('hub_verify_token');
     
-    // Log the specific parameters you're using for verification
-    Log::info('hub_mode: ' . $hubMode);
-    Log::info('hub_challenge: ' . $hubChallenge);
-    Log::info('hub_verify_token: ' . $hubVerifyToken);
+    // // Log the specific parameters you're using for verification
+    // Log::info('hub_mode: ' . $hubMode);
+    // Log::info('hub_challenge: ' . $hubChallenge);
+    // Log::info('hub_verify_token: ' . $hubVerifyToken);
 
-    if ($hubVerifyToken === 'meta_verify_2026') {
-        Log::info('Verification successful');  // Log verification success
+    // if ($hubVerifyToken === 'meta_verify_2026') {
+    //     Log::info('Verification successful');  // Log verification success
 
-        $addint = new OfficeIndiamartLeads;
-        $addint->folder_id = $hubChallenge;
-        $addint->save();
+    //     $addint = new OfficeIndiamartLeads;
+    //     $addint->folder_id = $hubChallenge;
+    //     $addint->save();
 
-        Log::info('Saved challenge value to database'); // Log successful database save
+    //     Log::info('Saved challenge value to database'); // Log successful database save
 
-        return response($hubChallenge, 200);
-    }
+    //     return response($hubChallenge, 200);
+    // }
     
-    Log::info('Verification failed');  // Log verification failure
-    return response('Verification failed', 403);
+    // Log::info('Verification failed');  // Log verification failure
+    // return response('Verification failed', 403);
+    // }
+
+
+    public function facebook_webhook(Request $request)
+{
+    Log::info("Webhook Verification Request", $request->all());
+
+    $mode      = $request->get('hub.mode');
+    $challenge = $request->get('hub.challenge');
+    $token     = $request->get('hub.verify_token');
+
+    Log::info("Mode: " . $mode);
+    Log::info("Challenge: " . $challenge);
+    Log::info("Token: " . $token);
+
+    if ($mode === "subscribe" && $token === "meta_verify_2026") {
+
+        Log::info("Webhook Verified Successfully!");
+
+        return response($challenge, 200)
+            ->header('Content-Type', 'text/plain');
     }
+
+    Log::error("Webhook Verification Failed!");
+    return response("Forbidden", 403);
+}
+
     
 
 
