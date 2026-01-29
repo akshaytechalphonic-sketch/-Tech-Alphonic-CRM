@@ -25,11 +25,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 //
 Route::post('/indiamart-webhook', [MyOfficeLeadsIntegrationController::class, 'indiamart_webhook']);
-// Route::get('/facebook-webhook', [MyOfficeLeadsIntegrationController::class, 'facebook_webhook']);
-Route::match(['get', 'post'], '/facebook-webhook', [
-    MyOfficeLeadsIntegrationController::class,
-    'facebook_webhook'
-]);
+Route::get('/facebook-webhook', [MyOfficeLeadsIntegrationController::class, 'facebook_webhook']);
+// Route::match(['get', 'post'], '/facebook-webhook', [
+//     MyOfficeLeadsIntegrationController::class,
+//     'facebook_webhook'
+// ]);
 Route::any('/webhook/{type}/{id?}', [MyOfficeLeadsIntegrationController::class, 'webhook']);
 
 Route::post('/check-office', [LocationController::class, 'checkOfficeArea']);
