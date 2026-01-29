@@ -39,14 +39,20 @@ class MyOfficeLeadsIntegrationController extends Controller
         try {
             $client = new Client();
             $response = $client->get('https://graph.facebook.com/v22.0/oauth/access_token', [
-                'query' => [
-                    'client_id' => "597982789329810",
-                    'client_secret' => "f78799c455601d771bdabb7fb375137a",
-                    // 'redirect_uri' => "https://leads-management-in.fantasybet9.in/admin/leads-integration/callback",
-                    'redirect_uri' => "https://oykey.in/admin/leads-integration/callback",
+                // 'query' => [
+                //     'client_id' => "597982789329810",
+                //     'client_secret' => "f78799c455601d771bdabb7fb375137a",
+                //     // 'redirect_uri' => "https://leads-management-in.fantasybet9.in/admin/leads-integration/callback",
+                //     'redirect_uri' => "https://oykey.in/admin/leads-integration/callback",
 
-                    'code' => $code,
-                ]
+                //     'code' => $code,
+                // ]
+                'query' => [
+                'client_id'     => env("FACEBOOK_CLIENT_ID"),
+                'client_secret' => env("FACEBOOK_CLIENT_SECRET"),
+                'redirect_uri'  => env("FACEBOOK_REDIRECT_URI"),
+                'code'          => $code,
+            ]
             ]);
 
             $data = json_decode($response->getBody(), true);
