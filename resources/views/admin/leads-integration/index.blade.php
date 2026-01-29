@@ -292,7 +292,9 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
             return { error: error.responseJSON?.error?.message || error.statusText };
         }
     }
-    const fbAppId = '597982789329810';
+    // const fbAppId = '597982789329810';
+    const fbAppId = '25777151058609150';
+
     // const redirectUri = 'https://leads-management-in.fantasybet9.in/admin/leads-integration/callback';
     const redirectUri = 'https://oykey.in/admin/leads-integration/callback';
 
