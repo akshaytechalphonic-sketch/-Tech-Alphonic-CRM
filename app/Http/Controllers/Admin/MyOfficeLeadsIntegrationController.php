@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
@@ -15,23 +16,24 @@ use Illuminate\Support\Facades\Log;
 
 class MyOfficeLeadsIntegrationController extends Controller
 {
-    public function index(){
-      
+    public function index()
+    {
+
         $lead_folders = OfficeLeadsFolders::all();
         $fb_leads = OfficeFacebookIntegrations::select('form_id')->where('type', 'fb_leads')->get()->pluck('form_id')->toArray();
-        
-        return view('admin.leads-integration.index', compact('lead_folders','fb_leads'));
+
+        return view('admin.leads-integration.index', compact('lead_folders', 'fb_leads'));
     }
     public function getLeadFolders()
     {
-        $lead_folders = OfficeLeadsFolders::orderBy('id',"DESC")->get();
+        $lead_folders = OfficeLeadsFolders::orderBy('id', "DESC")->get();
         return response()->json($lead_folders);
     }
 
 
     public function callback(Request $request)
     {
-        
+
         $code = $_GET['code'];
         if (!$code) {
             return response()->json(['error' => 'Authorization code missing'], 400);
@@ -49,16 +51,16 @@ class MyOfficeLeadsIntegrationController extends Controller
                 //     'code' => $code,
                 // ]
                 'query' => [
-                'client_id'     => env("FACEBOOK_CLIENT_ID"),
-                'client_secret' => env("FACEBOOK_CLIENT_SECRET"),
-                'redirect_uri'  => env("FACEBOOK_REDIRECT_URI"),
-                'code'          => $code,
-            ]
+                    'client_id'     => env("FACEBOOK_CLIENT_ID"),
+                    'client_secret' => env("FACEBOOK_CLIENT_SECRET"),
+                    'redirect_uri'  => env("FACEBOOK_REDIRECT_URI"),
+                    'code'          => $code,
+                ]
             ]);
 
             $data = json_decode($response->getBody(), true);
-           
-            
+
+
             session(['facebook_access_token' => $data['access_token']]);
 
             // Return JavaScript to send the token to the parent window
@@ -66,7 +68,6 @@ class MyOfficeLeadsIntegrationController extends Controller
                         window.opener.postMessage(" . json_encode(['access_token' => $data['access_token']]) . ", '*');
                         window.close();
                     </script>";
-
         } catch (\Exception $e) {
             return "<script>
                         window.opener.postMessage(" . json_encode(['error' => $e->getMessage()]) . ", '*');
@@ -75,10 +76,10 @@ class MyOfficeLeadsIntegrationController extends Controller
         }
     }
 
-    public function pages(Request $request,$token)
+    public function pages(Request $request, $token)
 
     {
-      
+
         if (!$token) {
             return response()->json(['error' => 'Authorization code missing'], 400);
         }
@@ -86,21 +87,21 @@ class MyOfficeLeadsIntegrationController extends Controller
         try {
             $client = new Client();
             $response = $client->get("https://graph.facebook.com/v22.0/me/accounts", [
-                    'query' => ['access_token' => $token]
+                'query' => ['access_token' => $token]
             ]);
-            
+
 
             $data = json_decode($response->getBody(), true);
-           
-            return response()->json($data);
 
+            return response()->json($data);
         } catch (\Exception $e) {
             // dd($e->getMessage());
             return $e->getMessage();
         }
     }
-    public function saveFbIntegration(Request $request){
-      
+    public function saveFbIntegration(Request $request)
+    {
+
         $addFbFrom = new OfficeFacebookIntegrations;
         $addFbFrom->page_id = $request->page_id;
         $addFbFrom->access_token = $request->access_token;
@@ -113,7 +114,8 @@ class MyOfficeLeadsIntegrationController extends Controller
         $addFbFrom->save();
         return redirect(route('admin.leads_integration.integrations'));
     }
-    public function saveImIntegration(Request $request){
+    public function saveImIntegration(Request $request)
+    {
         $addFbFrom = new OfficeFacebookIntegrations;
         $addFbFrom->access_token = $request->access_token;
         $addFbFrom->folder_id = $request->folder_id;
@@ -124,25 +126,29 @@ class MyOfficeLeadsIntegrationController extends Controller
     }
 
 
-    public function saveWebHookIntegration(Request $request){
+    public function saveWebHookIntegration(Request $request)
+    {
         $addFbFrom = new OfficeFacebookIntegrations;
         $addFbFrom->folder_id = $request->folder_id;
         $addFbFrom->access_token = Str::random(10);
         $addFbFrom->integration_id = Str::random(50);
-        $addFbFrom->webhook_id = $request->type_url.'/'.$addFbFrom->integration_id;
+        $addFbFrom->webhook_id = $request->type_url . '/' . $addFbFrom->integration_id;
         $addFbFrom->type = $request->type;
         $addFbFrom->save();
         return redirect(route('admin.leads_integration.integrations'));
     }
-    public function integrations(){
+    public function integrations()
+    {
         $integrations_leads = OfficeFacebookIntegrations::with('folder')->get();
         return view('admin.leads-integration.integrations', compact('integrations_leads'));
     }
-    public function single_integration ($integration_id){
+    public function single_integration($integration_id)
+    {
         $single_integration = OfficeFacebookIntegrations::where('integration_id', $integration_id)->with('folder')->first();
         return view('admin.leads-integration.single-integration', compact('single_integration'));
     }
-    public function indiamart_webhook(Request $request){
+    public function indiamart_webhook(Request $request)
+    {
         $response = $request->all();
         $main_response = $response['RESPONSE'];
         $addint = new OfficeIndiamartLeads;
@@ -150,79 +156,81 @@ class MyOfficeLeadsIntegrationController extends Controller
         $addint->folder_id = 1;
         $addint->response = json_encode($main_response);
         $addint->save();
-        
+
         return response()->json(['status' => 200, response => $response]);
     }
 
 
-    // public function facebook_webhook(Request $request){
-    //     Log::info('Received Webhook Request', $request->all());
+    public function facebook_webhook(Request $request)
+    {
+        Log::info('Received Webhook Request', $request->all());
 
-    // $hubMode = $request->get('hub_mode');
-    // $hubChallenge = $request->get('hub_challenge');
-    // $hubVerifyToken = $request->get('hub_verify_token');
-    
-    // // Log the specific parameters you're using for verification
-    // Log::info('hub_mode: ' . $hubMode);
-    // Log::info('hub_challenge: ' . $hubChallenge);
-    // Log::info('hub_verify_token: ' . $hubVerifyToken);
+        $hubMode = $request->get('hub_mode');
+        $hubChallenge = $request->get('hub_challenge');
+        $hubVerifyToken = $request->get('hub_verify_token');
 
-    // if ($hubVerifyToken === 'meta_verify_2026') {
-    //     Log::info('Verification successful');  // Log verification success
+        // Log the specific parameters you're using for verification
+        Log::info('hub_mode: ' . $hubMode);
+        Log::info('hub_challenge: ' . $hubChallenge);
+        Log::info('hub_verify_token: ' . $hubVerifyToken);
 
-    //     $addint = new OfficeIndiamartLeads;
-    //     $addint->folder_id = $hubChallenge;
-    //     $addint->save();
+        if ($hubVerifyToken === 'meta_verify_2026') {
+            Log::info('Verification successful');  // Log verification success
 
-    //     Log::info('Saved challenge value to database'); // Log successful database save
+            $addint = new OfficeIndiamartLeads;
+            $addint->folder_id = $hubChallenge;
+            $addint->save();
 
-    //     return response($hubChallenge, 200);
-    // }
-    
-    // Log::info('Verification failed');  // Log verification failure
-    // return response('Verification failed', 403);
-    // }
+            Log::info('Saved challenge value to database'); // Log successful database save
 
-
-   public function facebook_webhook(Request $request)
-{
-    if ($request->isMethod('get')) {
-
-        $mode      = $request->get('hub_mode') ?? $request->get('hub.mode');
-        $token     = $request->get('hub_verify_token') ?? $request->get('hub.verify_token');
-        $challenge = $request->get('hub_challenge') ?? $request->get('hub.challenge');
-
-        Log::info("Mode: $mode");
-        Log::info("Token: $token");
-        Log::info("Challenge: $challenge");
-
-        if ($token === "meta_verify_2026") {
-            return response($challenge, 200);
+            return response($hubChallenge, 200);
         }
 
-        return response("Invalid token", 403);
+        Log::info('Verification failed');  // Log verification failure
+        return response('Verification failed', 403);
     }
 
-    if ($request->isMethod('post')) {
-        Log::info("Webhook Event Received", $request->all());
-        return response("EVENT_RECEIVED", 200);
-    }
-}
+
+    //    public function facebook_webhook(Request $request)
+    // {
+    //     if ($request->isMethod('get')) {
+
+    //         $mode      = $request->get('hub_mode') ?? $request->get('hub.mode');
+    //         $token     = $request->get('hub_verify_token') ?? $request->get('hub.verify_token');
+    //         $challenge = $request->get('hub_challenge') ?? $request->get('hub.challenge');
+
+    //         Log::info("Mode: $mode");
+    //         Log::info("Token: $token");
+    //         Log::info("Challenge: $challenge");
+
+    //         if ($token === "meta_verify_2026") {
+    //             return response($challenge, 200);
+    //         }
+
+    //         return response("Invalid token", 403);
+    //     }
+
+    //     if ($request->isMethod('post')) {
+    //         Log::info("Webhook Event Received", $request->all());
+    //         return response("EVENT_RECEIVED", 200);
+    //     }
+    // }
 
 
 
- 
 
 
-    
-    public function webhook(Request $request, $type, $id){
+
+
+    public function webhook(Request $request, $type, $id)
+    {
         Log::info('Received Webhook Request', $request->all());
         $webhookData = $request->all();
         $integration = OfficeFacebookIntegrations::where('integration_id', $id)->first();
         $folder = OfficeLeadsFolders::find($integration->folder_id);
-        
-        if($integration != null){
-            if($type == 'elementor'){
+
+        if ($integration != null) {
+            if ($type == 'elementor') {
                 $new = new OfficeLeads;
                 $new->emp_id = 18;
                 $new->assign_date = date('Y-m-d');
@@ -234,7 +242,7 @@ class MyOfficeLeadsIntegrationController extends Controller
                 $new->type = $integration->type;
                 $new->integration_id = $integration->id;
                 $new->save();
-                if($integration->mapping == null){
+                if ($integration->mapping == null) {
                     $integration->mapping = json_encode(array_keys($webhookData));
                     $integration->save();
                 }
