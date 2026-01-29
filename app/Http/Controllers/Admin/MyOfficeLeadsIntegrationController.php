@@ -183,31 +183,34 @@ class MyOfficeLeadsIntegrationController extends Controller
     // }
 
 
-    public function facebook_webhook(Request $request)
+   public function facebook_webhook(Request $request)
 {
-    Log::info("Webhook Verification Request", $request->all());
-
-    $mode      = $request->get('hub.mode');
-    $challenge = $request->get('hub.challenge');
-    $token     = $request->get('hub.verify_token');
-
-    Log::info("Mode: " . $mode);
-    Log::info("Challenge: " . $challenge);
-    Log::info("Token: " . $token);
-
-    if ($mode === "subscribe" && $token === "meta_verify_2026") {
-
-        Log::info("Webhook Verified Successfully!");
-
-        return response($challenge, 200)
-            ->header('Content-Type', 'text/plain');
+    // ✅ STEP 1: META VERIFICATION (GET REQUEST)
+    if ($request->isMethod('get')) {
+ 
+        if (
+            $request->get('hub_mode') === 'subscribe' &&
+            $request->get('hub_verify_token') === 'meta_verify_2026'
+        ) {
+            // ⚠️ Meta expects ONLY plain text challenge
+            return response($request->get('hub_challenge'), 200)
+                ->header('Content-Type', 'text/plain');
+        }
+ 
+        return response('Forbidden', 403);
     }
-
-    Log::error("Webhook Verification Failed!");
-    return response("Forbidden", 403);
-}
-
-    
+ 
+    // ✅ STEP 2: LEAD DATA (POST REQUEST)
+    if ($request->isMethod('post')) {
+ 
+        Log::info('META LEAD WEBHOOK', $request->all());
+ 
+        // ❌ YAHAN verification logic NAHI
+        // ❌ DB save yahan hoga (later parsing)
+ 
+        return response('EVENT_RECEIVED', 200);
+    }
+}    
 
 
     
