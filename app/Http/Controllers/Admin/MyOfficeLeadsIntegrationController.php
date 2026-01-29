@@ -184,38 +184,27 @@ class MyOfficeLeadsIntegrationController extends Controller
     // }
 
 
-    public function facebook_webhook(Request $request)
+   public function facebook_webhook(Request $request)
 {
-    // ✅ Step 1: Verification (GET Request)
     if ($request->isMethod('get')) {
 
-        Log::info('Received Webhook Verification Request', $request->all());
+        $mode      = $request->get('hub_mode') ?? $request->get('hub.mode');
+        $token     = $request->get('hub_verify_token') ?? $request->get('hub.verify_token');
+        $challenge = $request->get('hub_challenge') ?? $request->get('hub.challenge');
 
-        $hubMode = $request->get('hub_mode');
-        $hubChallenge = $request->get('hub_challenge');
-        $hubVerifyToken = $request->get('hub_verify_token');
+        Log::info("Mode: $mode");
+        Log::info("Token: $token");
+        Log::info("Challenge: $challenge");
 
-        Log::info("hub_mode: " . $hubMode);
-        Log::info("hub_challenge: " . $hubChallenge);
-        Log::info("hub_verify_token: " . $hubVerifyToken);
-
-        if ($hubVerifyToken === 'meta_verify_2026') {
-
-            Log::info("✅ Verification Successful");
-
-            return response($hubChallenge, 200);
+        if ($token === "meta_verify_2026") {
+            return response($challenge, 200);
         }
 
-        Log::error("❌ Verification Failed");
-
-        return response("Verification failed", 403);
+        return response("Invalid token", 403);
     }
 
-    // ✅ Step 2: Event Handling (POST Request)
     if ($request->isMethod('post')) {
-
-        Log::info("📩 Webhook Event Received", $request->all());
-
+        Log::info("Webhook Event Received", $request->all());
         return response("EVENT_RECEIVED", 200);
     }
 }
