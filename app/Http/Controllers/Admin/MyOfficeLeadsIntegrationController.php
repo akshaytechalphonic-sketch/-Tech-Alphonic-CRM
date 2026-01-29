@@ -31,6 +31,7 @@ class MyOfficeLeadsIntegrationController extends Controller
 
     public function callback(Request $request)
     {
+        dd('ds');
         $code = $_GET['code'];
         if (!$code) {
             return response()->json(['error' => 'Authorization code missing'], 400);
