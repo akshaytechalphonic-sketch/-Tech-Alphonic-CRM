@@ -293,7 +293,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
         }
     }
     // const fbAppId = '597982789329810';
-    const fbAppId = '25777151058609150';
+    const fbAppId = '2755797278093118';
 
     // const redirectUri = 'https://leads-management-in.fantasybet9.in/admin/leads-integration/callback';
     const redirectUri = 'https://oykey.in/admin/leads-integration/callback';
@@ -305,7 +305,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
     const facebookLoginUrl =
   `https://www.facebook.com/v19.0/dialog/oauth?client_id=${fbAppId}` +
   `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-  `&scope=pages_show_list,pages_read_engagement`;
+  `&scope=pages_show_list,leads_retrieval`;
 
 window.location.href = facebookLoginUrl;
         
