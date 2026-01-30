@@ -326,7 +326,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
                         $('.selectFacebookPage').removeClass('d-none')
                         $.each(response.data, function(index, element) {
                             console.log(element);
-                            $('#selectFacebookPage').append(`<option value="${element.id}" data-accessId="${element.access_token}">${element.name}</option>`)
+                            $('#selectFacebookPage').append(`<option value="${element.id}" data-accessid="${element.access_token}">${element.name}</option>`)
                         });
                     }
                 });
@@ -336,7 +336,10 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
         });
     });
     $('#selectFacebookPage').on('change',function(){
-        $('#selectFacebookPageForm').html('')
+        // $('#selectFacebookPageForm').html('')
+        $('#selectFacebookPageForm').html(`
+   <option selected disabled>Select Page Forms</option>
+`);
         getFacebookForms($(this).val(), $(this).find('option:selected').data('accessid')).then(response => {
                     if (response.data) {
                         console.log(response.data)
@@ -357,6 +360,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
     })
     $('#selectFacebookPageForm').on('change',function(){
         $('.selectFacebookPageFormFolder').removeClass('d-none')
+        $('#saveFbIntegration').addClass('d-none');
         $('input[name=form_name]').val($(this).find('option:selected').text())
         // getFacebookPagesFormLeads($(this).val(), $(`input[name=access_token]`).val()).then(response => {
         //     let datas = response.data[0];
