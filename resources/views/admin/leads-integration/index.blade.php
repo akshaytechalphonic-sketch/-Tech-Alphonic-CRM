@@ -205,7 +205,7 @@
         </div>
         <script src="https://apis.google.com/js/api:client.js"></script>
 
-
+// setup google api
 <script>
         function handleCredentialResponse(response) {
             const responsePayload = parseJwt(response.credential);
@@ -413,5 +413,8 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
     })
 });
 </script>
-
-@endsection
+// end setup indiamart api
+<!--<script src="{{ asset('public/admin/assets/js/fb.js')}}"></script>-->
+        @push('custom-js')
+        @endpush
+    @endsection
