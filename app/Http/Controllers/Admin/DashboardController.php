@@ -110,4 +110,8 @@ class DashboardController extends Controller
 
         return view('admin.dashboard.index', compact('leads', 'login_employee', 'monthlyTarget', 'all_leads', 'sales_emp', 'total_tasks', 'completed_tasks', 'in_progress', 'pending_tasks', 'taskChart', 'active_emp', 'Inactive_emp', 'online', 'offline', 'sales', 'revenue','monthlySales'));
     }
+
+    public function privacyPolicy(){
+        return view('privacy');
+    }
 }
