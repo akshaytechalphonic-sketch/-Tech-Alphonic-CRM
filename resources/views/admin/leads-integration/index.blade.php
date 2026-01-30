@@ -301,7 +301,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
     $('#facebookLoginButton').click(function() {
         console.log('click')
         // const facebookLoginUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${fbAppId}&redirect_uri=${redirectUri}&scope=pages_show_list,pages_read_engagement,leads_retrieval,pages_manage_ads`;
-        const facebookLoginUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${fbAppId}&redirect_uri=${redirectUri}&scope=pages_show_list,leads_retrieval,pages_manage_ads`;
+        const facebookLoginUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${fbAppId}&redirect_uri=${redirectUri}&scope=pages_show_list,leads_retrieval`;
 
         const popup = window.open(facebookLoginUrl, 'facebookLoginPopup', 'width=600,height=700');
 //     const facebookLoginUrl =
@@ -326,7 +326,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
                         $('.selectFacebookPage').removeClass('d-none')
                         $.each(response.data, function(index, element) {
                             console.log(element);
-                            $('#selectFacebookPage').append(`<option value="${element.id}" data-accessid="${element.access_token}">${element.name}</option>`)
+                            $('#selectFacebookPage').append(`<option value="${element.id}" data-accessId="${element.access_token}">${element.name}</option>`)
                         });
                     }
                 });
@@ -336,10 +336,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
         });
     });
     $('#selectFacebookPage').on('change',function(){
-        // $('#selectFacebookPageForm').html('')
-        $('#selectFacebookPageForm').html(`
-   <option selected disabled>Select Page Forms</option>
-`);
+        $('#selectFacebookPageForm').html('')
         getFacebookForms($(this).val(), $(this).find('option:selected').data('accessid')).then(response => {
                     if (response.data) {
                         console.log(response.data)
@@ -360,7 +357,6 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
     })
     $('#selectFacebookPageForm').on('change',function(){
         $('.selectFacebookPageFormFolder').removeClass('d-none')
-        $('#saveFbIntegration').addClass('d-none');
         $('input[name=form_name]').val($(this).find('option:selected').text())
         // getFacebookPagesFormLeads($(this).val(), $(`input[name=access_token]`).val()).then(response => {
         //     let datas = response.data[0];
@@ -418,7 +414,4 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
 });
 </script>
 // end setup indiamart api
-// <!--<script src="{{ asset('public/admin/assets/js/fb.js')}}"></script>-->
-//         @push('custom-js')
-//         @endpush
-//     @endsection
+
