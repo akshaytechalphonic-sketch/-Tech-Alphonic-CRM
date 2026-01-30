@@ -31,50 +31,107 @@ class MyOfficeLeadsIntegrationController extends Controller
     }
 
 
+    // public function callback(Request $request)
+    // {
+
+    //     $code = $_GET['code'];
+    //     if (!$code) {
+    //         return response()->json(['error' => 'Authorization code missing'], 400);
+    //     }
+
+    //     try {
+    //         $client = new Client();
+    //         $response = $client->get('https://graph.facebook.com/v22.0/oauth/access_token', [
+                
+    //             'query' => [
+    //                 'client_id'     => env("FACEBOOK_CLIENT_ID"),
+    //                 'client_secret' => env("FACEBOOK_CLIENT_SECRET"),
+    //                 'redirect_uri'  => env("FACEBOOK_REDIRECT_URI"),
+    //                 'code'          => $code,
+    //             ]
+    //         ]);
+
+    //         $data = json_decode($response->getBody(), true);
+
+
+    //         session(['facebook_access_token' => $data['access_token']]);
+
+    //         // Return JavaScript to send the token to the parent window
+    //         return "<script>
+    //                     window.opener.postMessage(" . json_encode(['access_token' => $data['access_token']]) . ", '*');
+    //                     window.close();
+    //                 </script>";
+    //     } catch (\Exception $e) {
+    //         return "<script>
+    //                     window.opener.postMessage(" . json_encode(['error' => $e->getMessage()]) . ", '*');
+    //                     window.close();
+    //                 </script>";
+    //     }
+    // }
     public function callback(Request $request)
-    {
+{
+    // ✅ Facebook error check
+    if ($request->has('error')) {
+        return response()->json([
+            "error" => $request->get('error_description')
+        ], 400);
+    }
 
-        $code = $_GET['code'];
-        if (!$code) {
-            return response()->json(['error' => 'Authorization code missing'], 400);
-        }
+    // ✅ Safe code fetch
+    $code = $request->get('code');
 
-        try {
-            $client = new Client();
-            $response = $client->get('https://graph.facebook.com/v22.0/oauth/access_token', [
-                // 'query' => [
-                //     'client_id' => "597982789329810",
-                //     'client_secret' => "f78799c455601d771bdabb7fb375137a",
-                //     // 'redirect_uri' => "https://leads-management-in.fantasybet9.in/admin/leads-integration/callback",
-                //     'redirect_uri' => "https://oykey.in/admin/leads-integration/callback",
+    if (!$code) {
+        return response()->json([
+            'error' => 'Authorization code missing'
+        ], 400);
+    }
 
-                //     'code' => $code,
-                // ]
+    try {
+
+        $client = new \GuzzleHttp\Client();
+
+        $response = $client->get(
+            "https://graph.facebook.com/v22.0/oauth/access_token",
+            [
                 'query' => [
                     'client_id'     => env("FACEBOOK_CLIENT_ID"),
                     'client_secret' => env("FACEBOOK_CLIENT_SECRET"),
                     'redirect_uri'  => env("FACEBOOK_REDIRECT_URI"),
                     'code'          => $code,
                 ]
-            ]);
+            ]
+        );
 
-            $data = json_decode($response->getBody(), true);
+        $data = json_decode($response->getBody(), true);
 
-
-            session(['facebook_access_token' => $data['access_token']]);
-
-            // Return JavaScript to send the token to the parent window
-            return "<script>
-                        window.opener.postMessage(" . json_encode(['access_token' => $data['access_token']]) . ", '*');
-                        window.close();
-                    </script>";
-        } catch (\Exception $e) {
-            return "<script>
-                        window.opener.postMessage(" . json_encode(['error' => $e->getMessage()]) . ", '*');
-                        window.close();
-                    </script>";
+        // ✅ Check token exists
+        if (!isset($data['access_token'])) {
+            return response()->json([
+                "error" => "Access token not received",
+                "response" => $data
+            ], 500);
         }
+
+        session(['facebook_access_token' => $data['access_token']]);
+
+        // ✅ Popup safe close
+        return "<script>
+            if(window.opener){
+                window.opener.postMessage(" . json_encode([
+                    'access_token' => $data['access_token']
+                ]) . ", '*');
+            }
+            window.close();
+        </script>";
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            "error" => $e->getMessage()
+        ], 500);
     }
+}
+
 
     public function pages(Request $request, $token)
 
