@@ -151,5 +151,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::any('share-you-travel', [dashboardController::class, 'shareYouTravel'])->name('share-you-travel');
     Route::any('delete-share-you-travel/{id}', [dashboardController::class, 'deleteshareYouTravel'])->name('delete-share-you-travel');
 });
-    Route::any('privacy-policy', [dashboardController::class, 'privacyPolicy'])->name('privacy-policy');
+   Route::get('/privacy-policy', [dashboardController::class, 'privacyPolicy']);
 
