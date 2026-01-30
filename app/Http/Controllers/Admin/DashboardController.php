@@ -112,7 +112,7 @@ class DashboardController extends Controller
     }
 
     public function privacyPolicy(){
-        dd('dd');
+     
         return view('privacy');
     }
 }

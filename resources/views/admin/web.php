@@ -144,7 +144,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 
-    Route::any('privacy-policy', [dashboardController::class, 'privacyPolicy'])->name('privacy-policy');
+    // Route::any('privacy-policy', [dashboardController::class, 'privacyPolicy'])->name('privacy-policy');
+    Route::get('/privacy-policy', [DashboardController::class, 'privacyPolicy']);
 
 
 
