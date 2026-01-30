@@ -305,7 +305,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
 `https://www.facebook.com/v19.0/dialog/oauth?
 client_id=${fbAppId}
 &redirect_uri=${redirectUri}
-&scope=pages_show_list,pages_read_engagement,leads_retrieval,ads_management`;
+&scope=pages_show_list,leads_retrieval`;
         const popup = window.open(facebookLoginUrl, 'facebookLoginPopup', 'width=600,height=700');
 
         $(window).on('message', function(event) {
