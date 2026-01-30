@@ -205,7 +205,7 @@
         </div>
         <script src="https://apis.google.com/js/api:client.js"></script>
 
-// setup google api
+
 <script>
         function handleCredentialResponse(response) {
             const responsePayload = parseJwt(response.credential);
@@ -313,7 +313,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
         
 
         $(window).on('message', function(event) {
-            if (event.originalEvent.origin !== window.location.origin) return;
+            // if (event.originalEvent.origin !== window.location.origin) return;
             
             let data = event.originalEvent.data;
             console.log(data);
@@ -333,7 +333,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
             } else {
                 console.error("Error retrieving access token:", data);
             }
-        });
+        // });
     });
     $('#selectFacebookPage').on('change',function(){
         $('#selectFacebookPageForm').html('')
@@ -413,8 +413,5 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
     })
 });
 </script>
-// end setup indiamart api
-<!--<script src="{{ asset('public/admin/assets/js/fb.js')}}"></script>-->
-        @push('custom-js')
-        @endpush
-    @endsection
+
+@endsection
