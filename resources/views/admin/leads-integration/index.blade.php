@@ -414,7 +414,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
 });
 </script>
 // end setup indiamart api
-<!--<script src="{{ asset('public/admin/assets/js/fb.js')}}"></script>-->
-        @push('custom-js')
-        @endpush
-    @endsection
+// <!--<script src="{{ asset('public/admin/assets/js/fb.js')}}"></script>-->
+//         @push('custom-js')
+//         @endpush
+//     @endsection
