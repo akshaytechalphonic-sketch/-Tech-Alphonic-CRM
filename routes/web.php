@@ -48,6 +48,7 @@ use App\Http\Controllers\NotificationController;
 */
 
 // Admins
+Route::get('/privacy-policy', [dashboardController::class, 'privacyPolicy']);
 Route::any('/', [LoginController::class, 'login'])->name('login');
 Route::any('/login', [LoginController::class, 'submit'])->name('admin.login');
 Route::any('/sign-up', [LoginController::class, 'signup'])->name('signup');
