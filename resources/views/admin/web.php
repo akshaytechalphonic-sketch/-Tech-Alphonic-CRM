@@ -8,6 +8,7 @@ use App\Http\Controllers\admin\loginController;
 use App\Http\Controllers\admin\WebPageController;
 use App\Http\Controllers\admin\TestimonialController;
 
+  Route::get('/privacy-policy', [dashboardController::class, 'privacyPolicy']);
 
 Route::get('cache', function () {
 
@@ -151,5 +152,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::any('share-you-travel', [dashboardController::class, 'shareYouTravel'])->name('share-you-travel');
     Route::any('delete-share-you-travel/{id}', [dashboardController::class, 'deleteshareYouTravel'])->name('delete-share-you-travel');
 });
-   Route::get('/privacy-policy', [dashboardController::class, 'privacyPolicy']);
+ 
 
