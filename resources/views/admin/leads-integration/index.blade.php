@@ -313,7 +313,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
         
 
         $(window).on('message', function(event) {
-            // if (event.originalEvent.origin !== window.location.origin) return;
+            if (event.originalEvent.origin !== window.location.origin) return;
             
             let data = event.originalEvent.data;
             console.log(data);
@@ -333,7 +333,7 @@ async function getFacebookPagesFormLeads(form_id, access_token) {
             } else {
                 console.error("Error retrieving access token:", data);
             }
-        // });
+        });
     });
     $('#selectFacebookPage').on('change',function(){
         $('#selectFacebookPageForm').html('')
