@@ -48,6 +48,8 @@ use App\Http\Controllers\NotificationController;
 */
 
 // Admins
+Route::get('/data-deletion', [dashboardController::class, 'dataDeletion']);
+Route::get('/terms', [dashboardController::class, 'terms']);
 Route::get('/privacy-policy', [dashboardController::class, 'privacyPolicy']);
 Route::any('/', [LoginController::class, 'login'])->name('login');
 Route::any('/login', [LoginController::class, 'submit'])->name('admin.login');

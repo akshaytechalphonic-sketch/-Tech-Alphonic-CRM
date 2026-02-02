@@ -115,5 +115,14 @@ class DashboardController extends Controller
      
         return view('privacy');
     }
+    public function terms(){
+     
+        return view('terms');
+    }
+    
+    public function dataDeletion(){
+     
+        return view('data-deletion');
+    }
     
 }
