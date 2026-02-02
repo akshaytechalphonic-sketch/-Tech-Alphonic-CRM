@@ -476,13 +476,66 @@ class MyOfficeLeadsEmployeeController extends Controller
         }
         return redirect()->back()->with('success', 'Leads Assigned Successfully!');
     }
+    // public function trash($id)
+    // {
+    //     $trash = OfficeLeads::find($id);
+    //     $trash->trash = true;
+    //     $trash->update();
+    //     return redirect()->back()->with('success', 'Lead Trashed Successfully!');
+    // }
+
     public function trash($id)
-    {
-        $trash = OfficeLeads::find($id);
-        $trash->trash = true;
-        $trash->update();
-        return redirect()->back()->with('success', 'Lead Trashed Successfully!');
+{
+    $login_employee = Auth::guard('office_employees')->user();
+
+    $lead = OfficeLeads::find($id);
+
+    // Lead Amount Save Before Trash
+    $final_amount = $lead->final_amount;
+    $recived_amount = $lead->recived_amount ?? 0;
+
+    // Mark Lead as Trash
+    $lead->trash = true;
+    $lead->update();
+
+    // Month & Day
+    $month = strtolower(date('M'));
+    $day = date('d');
+
+    // Find Target Row
+    $targetRow = OfficeSaleTargets::where('emp_id', $login_employee->id)
+        ->where('year', date('Y'))
+        ->first();
+
+    if ($targetRow && $targetRow->$month) {
+
+        $jsonData = json_decode($targetRow->$month, true);
+
+        // Remove Matching Entry
+        $updatedData = [];
+
+        foreach ($jsonData as $entry) {
+
+            // Skip the deleted lead amount entry
+            if (
+                $entry['day'] == $day &&
+                $entry['final_amount'] == $final_amount &&
+                $entry['recived_amount'] == $recived_amount
+            ) {
+                continue;
+            }
+
+            $updatedData[] = $entry;
+        }
+
+        // Update Month JSON
+        $targetRow->$month = json_encode($updatedData);
+        $targetRow->update();
     }
+
+    return redirect()->back()->with('success', 'Lead Trashed & Target Updated Successfully!');
+}
+
     public function followup(Request $request, $lead_id)
     {
         $login_employee = Auth::guard('office_employees')->user();
