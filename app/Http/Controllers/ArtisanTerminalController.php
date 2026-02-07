@@ -7,6 +7,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\OfficeEmployees;
 use App\Models\Meeting;
+use App\Models\UploadedExcel;
+use App\Models\UploadedExcelRow;
+use Illuminate\Support\Facades\Http;
 
 class ArtisanTerminalController extends Controller
 {
@@ -83,4 +86,204 @@ class ArtisanTerminalController extends Controller
             'message' => $updatedCount . ' past meetings marked as completed'
         ]);
     }
+
+    // public function sync(Request $request)
+    // {
+    //     try {
+
+    //         $sheets = UploadedExcel::where("status", "live_sync")->get();
+
+    //         $totalImported = 0;
+
+    //         foreach ($sheets as $sheet) {
+
+    //             if (!$sheet->sheet_url) continue;
+
+    //             // ✅ Extract Sheet ID
+    //             preg_match("/\/d\/(.*?)\//", $sheet->sheet_url, $matches);
+
+    //             if (!isset($matches[1])) continue;
+
+    //             $sheetId = $matches[1];
+
+    //             // ✅ GVIZ JSON URL
+    //             $url = "https://docs.google.com/spreadsheets/d/$sheetId/gviz/tq?tqx=out:json";
+
+    //             $response = Http::timeout(15)->get($url);
+
+    //             if (!$response->successful()) {
+    //                 continue;
+    //             }
+
+    //             $body = $response->body();
+
+    //             // Remove wrapper
+    //             $body = str_replace(
+    //                 "/*O_o*/\ngoogle.visualization.Query.setResponse(",
+    //                 "",
+    //                 $body
+    //             );
+
+    //             $body = substr($body, 0, -2);
+
+    //             $json = json_decode($body, true);
+
+    //             $rows = $json["table"]["rows"] ?? [];
+
+    //             if (empty($rows)) continue;
+
+    //             // ✅ Last Synced Row
+    //             $lastRow = $sheet->last_synced_row ?? 0;
+
+    //             $insert = [];
+    //             $rowNo = $lastRow + 1;
+
+    //             foreach ($rows as $index => $row) {
+
+    //                 // Skip old rows
+    //                 if ($index < $lastRow) continue;
+
+    //                 $data = [
+    //                     "client_name"   => $row["c"][0]["v"] ?? null,
+    //                     "client_mobile" => $row["c"][1]["v"] ?? null,
+    //                     "client_email"  => $row["c"][2]["v"] ?? null,
+    //                     "service_name"  => $row["c"][3]["v"] ?? null,
+    //                 ];
+
+    //                 $insert[] = [
+    //                     "uploaded_excel_id" => $sheet->id,
+    //                     "excel_row_no"      => $rowNo++,
+    //                     "raw_json"          => json_encode($data),
+    //                     "is_assigned"       => 0,
+    //                     "created_at"        => now(),
+    //                     "updated_at"        => now(),
+    //                 ];
+    //             }
+
+    //             if (!empty($insert)) {
+
+    //                 UploadedExcelRow::insert($insert);
+
+    //                 $sheet->update([
+    //                     "last_synced_row" => count($rows),
+    //                     "total_rows"      => count($rows),
+    //                 ]);
+
+    //                 $totalImported += count($insert);
+    //             }
+    //         }
+
+    //         return response()->json([
+    //             "status" => true,
+    //             "message" => "Sync Completed",
+    //             "imported_leads" => $totalImported
+    //         ]);
+
+    //     } catch (\Throwable $e) {
+
+    //         return response()->json([
+    //             "status" => false,
+    //             "error" => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
+    public function sync(Request $request)
+{
+    try {
+
+        $sheets = UploadedExcel::where("sheet_status", "live_sync")->get();
+   
+        $totalImported = 0;
+
+        foreach ($sheets as $sheet) {
+
+            if (!$sheet->sheet_url) continue;
+
+            // Extract Sheet ID
+            preg_match("/\/d\/(.*?)\//", $sheet->sheet_url, $matches);
+            if (!isset($matches[1])) continue;
+
+            $sheetId = $matches[1];
+           
+
+            // ✅ Use CSV export (NO CACHE ISSUE)
+            $url = "https://docs.google.com/spreadsheets/d/$sheetId/export?format=csv";
+           
+
+            $csvData = Http::timeout(20)->get($url);
+            
+
+            if (!$csvData->successful()) continue;
+
+            $rows = array_map('str_getcsv', explode("\n", $csvData->body()));
+
+            if (count($rows) <= 1) continue;
+
+            // Remove header row
+            $header = array_shift($rows);
+
+            $lastSynced = $sheet->last_synced_row ?? 0;
+            $currentRowCount = count($rows);
+
+            if ($currentRowCount <= $lastSynced) {
+                continue;
+            }
+
+            $insert = [];
+
+            for ($i = $lastSynced; $i < $currentRowCount; $i++) {
+
+                if (!isset($rows[$i])) continue;
+
+                $row = $rows[$i];
+
+                $data = [
+                    "client_name"   => $row[0] ?? null,
+                    "client_mobile" => $row[1] ?? null,
+                    "client_email"  => $row[2] ?? null,
+                    "service_name"  => $row[3] ?? null,
+                ];
+
+                if (!$data['client_name'] && !$data['client_mobile']) continue;
+
+                $insert[] = [
+                    "uploaded_excel_id" => $sheet->id,
+                    "excel_row_no"      => $i + 1,
+                    "raw_json"          => json_encode($data),
+                    "is_assigned"       => 0,
+                    "created_at"        => now(),
+                    "updated_at"        => now(),
+                ];
+            }
+
+            if (!empty($insert)) {
+
+                UploadedExcelRow::insert($insert);
+
+                $sheet->update([
+                    "last_synced_row" => $currentRowCount,
+                    "total_rows"      => $currentRowCount,
+                ]);
+
+                $totalImported += count($insert);
+            }
+        }
+
+        return response()->json([
+            "status" => true,
+            "message" => "Sync Completed",
+            "imported_leads" => $totalImported
+        ]);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            "status" => false,
+            "error" => $e->getMessage()
+        ], 500);
+    }
+}
+
 }

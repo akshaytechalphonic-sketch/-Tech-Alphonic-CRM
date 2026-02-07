@@ -37,3 +37,4 @@ Route::get('/cronjob-notification', [NotificationController::class, 'cronjob_not
 
 Route::any('/employees/offline-all', [ArtisanTerminalController::class, 'offlineAll']);
 Route::any('/meetings/status-update', [ArtisanTerminalController::class, 'meetingStatusUpdate']);
+Route::any("/google-sheet/sync-leads", [ArtisanTerminalController::class, "sync"]); 

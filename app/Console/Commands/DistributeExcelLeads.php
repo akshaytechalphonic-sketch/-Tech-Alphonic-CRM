@@ -115,11 +115,10 @@ class DistributeExcelLeads extends Command
                 $row->update(['is_assigned' => 1]);
                 $i++;
             }
-
+            
             $job->update(['status' => 'completed']);
-
-            UploadedExcel::where('id', $job->uploaded_excel_id)
-                ->update(['status' => 'partially_distributed']);
+            
+            UploadedExcel::where('id', $job->uploaded_excel_id)->update(['status' => 'partially_distributed']);
 
             DB::commit();
             // } catch (\Throwable $e) {

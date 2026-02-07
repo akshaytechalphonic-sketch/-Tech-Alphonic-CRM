@@ -16,15 +16,21 @@ class UploadedExcel extends Model
     protected $fillable = [
         'file_name',
         'original_name',
+        'sheet_name',
         'total_rows',
         'total_columns',
         'uploaded_by',
         'UploadedExcel',
         'created_at' ,
         'updated_at',
+        'last_synced_row',
+        'column_mapping',
+        'source_type',
+        'sheet_url',
+        'default_folder_id',
         'status',
+        'sheet_status'
     ];
-
 
     public function lastDistribution()
 {

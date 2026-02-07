@@ -101,10 +101,18 @@
 
                 <div class="dash-tabs-filter multi-btns d-flex gap-3">
 
+
+
                     <div class="create-client-btn active d-flex ">
 
-                        <a href="#!" class="btn btn-sm me-2" data-bs-toggle="modal" data-bs-target="#uploadCsvModel"> <img
-                                src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt=""> Upload
+                       <a href="javascript:void(0)" class="btn btn-sm me-2"
+   data-bs-toggle="modal" data-bs-target="#googlesheetModal">
+    <img src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt="">
+    Google Sheet
+</a>
+
+                        <a href="#!" class="btn btn-sm me-2" data-bs-toggle="modal" data-bs-target="#uploadCsvModel">
+                            <img src="{{ asset('public/admin/assets/images/icons/plus.png') }}" alt=""> Upload
                             CSV </a>
 
                     </div>
@@ -193,6 +201,106 @@
 
     </div>
     </section>
+
+  <div class="modal fade" id="googlesheetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">Connect Google Sheet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Form Start -->
+            <form method="POST" action="{{ route('admin.google.sheet.connect') }}">
+                @csrf
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+
+                    <!-- Sheet URL -->
+                    <div class="mb-3">
+                        <label class="form-label">Google Sheet URL</label>
+                        <input type="text" id="sheet_url" name="sheet_url"
+                               class="form-control" required>
+                    </div>
+
+                    <!-- Fetch Columns Button -->
+                    <button type="button" id="fetchColumnsBtn" class="btn btn-primary">
+                        Fetch Columns
+                    </button>
+
+                    <hr>
+
+                    <!-- Mapping Section -->
+                    <div id="mappingSection" style="display:none;">
+
+                        <h5 class="mb-3">Map Sheet Columns</h5>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label>Name Column</label>
+                                <select name="mapping[client_name]" id="client_name"
+                                        class="form-control" required></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Phone Column</label>
+                                <select name="mapping[client_mobile]" id="client_mobile"
+                                        class="form-control" required></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Email Column</label>
+                                <select name="mapping[client_email]" id="client_email"
+                                        class="form-control"></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Service Column</label>
+                                <select name="mapping[service_name]" id="service_name"
+                                        class="form-control"></select>
+                            </div>
+
+                        </div>
+
+                        <!-- Folder Selection -->
+                        <div class="mb-3">
+                            <label>Select Folder</label>
+                            <select name="folder_id" class="form-control" required>
+                                @foreach ($folders as $folder)
+                                    <option value="{{ $folder->id }}">
+                                        {{ $folder->folder_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
+
+                    <button type="submit" id="connectBtn"
+                            class="btn btn-success" style="display:none;">
+                        Connect Live Sync
+                    </button>
+                </div>
+
+            </form>
+            <!-- Form End -->
+
+        </div>
+    </div>
+</div>
 
     <div class="modal fade" id="uploadCsvModel" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -373,6 +481,54 @@
         </div>
 
         @push('custom-js')
+         <script>
+                document.getElementById("fetchColumnsBtn").addEventListener("click", function() {
+
+                    let sheetUrl = document.getElementById("sheet_url").value;
+                    
+
+                    fetch("{{ route('admin.google.sheet.fetchColumns') }}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                            },
+                            body: JSON.stringify({
+                                sheet_url: sheetUrl
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            console.log('API Response:', data);
+                            if (!data.status) {
+                                alert(data.message);
+                                return;
+                            }
+
+                            let headers = data.headers;
+                            let fields = ["client_name", "client_mobile", "client_email", "service_name"];
+
+                            fields.forEach(field => {
+
+                                let select = document.getElementById(field);
+                                select.innerHTML = "";
+
+                                headers.forEach(col => {
+                                    let option = document.createElement("option");
+                                    option.value = col;
+                                    option.text = col;
+                                    select.appendChild(option);
+                                });
+
+                            });
+
+                            document.getElementById("mappingSection").style.display = "block";
+                            document.getElementById("connectBtn").style.display = "inline-block";
+
+                        });
+
+                });
+            </script>
             <script>
                 $("[name=csv]").on('change', function() {
                     let file = this.files[0];
@@ -523,5 +679,7 @@
                     btn.closest('.distribution-block').remove();
                 }
             </script>
+
+           
         @endpush
     @endsection

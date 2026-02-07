@@ -36,13 +36,13 @@ class MyOfficeLeadsController extends Controller
         })->with(['designation', 'designation.department'])->get();
         $lead_folders = OfficeLeadsFolders::all();
 
-        return view('admin.office.leads', compact('leads', 'sales_emp', 'lead_folders','seniors'));
+        return view('admin.office.leads', compact('leads', 'sales_emp', 'lead_folders', 'seniors'));
     }
 
     public function create_lead(Request $request)
     {
-      
-        $login_employee = OfficeEmployees::where('id',$request->emp_id)->first();
+
+        $login_employee = OfficeEmployees::where('id', $request->emp_id)->first();
         // dd($login_employee);
         $addlead = new OfficeLeads;
         $addlead->emp_id = $request->emp_id;
@@ -102,7 +102,7 @@ class MyOfficeLeadsController extends Controller
     }
     public function single_folder($slug)
     {
-        
+
         $single_folder = OfficeLeadsFolders::where('slug', $slug)->first();
 
         $lead_folders = OfficeLeadsFolders::all();
@@ -129,7 +129,7 @@ class MyOfficeLeadsController extends Controller
         })->with(['designation', 'designation.department'])->get();
 
 
-       
+
 
         return view('admin.office.single-lead-folder', compact('lead_folders', 'leads', 'slug', 'sales_emp', 'single_folder', 'sales_emp_folder'));
     }
@@ -139,7 +139,7 @@ class MyOfficeLeadsController extends Controller
     {
         $uploadedexcel = UploadedExcel::with('uploadedexcelrow')->get();
 
-        
+
         $folders  = OfficeLeadsFolders::all();
 
         return view('admin.office.uploadedexcel', compact('uploadedexcel', 'folders'));
@@ -180,7 +180,7 @@ class MyOfficeLeadsController extends Controller
         });
         unset($rows[0]); // remove header
 
-        
+
 
         $insert = [];
         $rowNo = 1;
@@ -331,35 +331,35 @@ class MyOfficeLeadsController extends Controller
     //     }
     // }
 
-  
 
 
-  public function scheduleDistribution(Request $request)
-{
-    // dd($request);
-    $request->validate([
-        'excel_id'        => 'required|exists:uploaded_excels,id',
-        'folder_id'       => 'required|array',
-        'start'           => 'required|array',
-        'end'             => 'required|array',
-        'assign_date'     => 'required|array',
-        'assign_time'     => 'required|array',
-    ]);
 
-    foreach ($request->folder_id as $index => $folderId) {
-
-        ExcelDistribution::create([
-            'uploaded_excel_id' => $request->excel_id,
-            'folder_id'         => $folderId,
-            'start_row'         => $request->start[$index],
-            'end_row'           => $request->end[$index],
-            'run_at'            => $request->assign_date[$index] . ' ' . $request->assign_time[$index],
-            'status'            => 'pending',
+    public function scheduleDistribution(Request $request)
+    {
+        // dd($request);
+        $request->validate([
+            'excel_id'        => 'required|exists:uploaded_excels,id',
+            'folder_id'       => 'required|array',
+            'start'           => 'required|array',
+            'end'             => 'required|array',
+            'assign_date'     => 'required|array',
+            'assign_time'     => 'required|array',
         ]);
-    }
 
-    return back()->with('success', 'Multiple distributions scheduled successfully');
-}
+        foreach ($request->folder_id as $index => $folderId) {
+
+            ExcelDistribution::create([
+                'uploaded_excel_id' => $request->excel_id,
+                'folder_id'         => $folderId,
+                'start_row'         => $request->start[$index],
+                'end_row'           => $request->end[$index],
+                'run_at'            => $request->assign_date[$index] . ' ' . $request->assign_time[$index],
+                'status'            => 'pending',
+            ]);
+        }
+
+        return back()->with('success', 'Multiple distributions scheduled successfully');
+    }
 
 
     private function getAvailableEmployees()
@@ -453,32 +453,32 @@ class MyOfficeLeadsController extends Controller
     public function cron_history($id)
     {
 
-        $cronleads = ExcelDistribution::where('uploaded_excel_id',$id)->with('uploadexcell', 'employeefolder')->get();
+        $cronleads = ExcelDistribution::where('uploaded_excel_id', $id)->with('uploadexcell', 'employeefolder')->get();
 
 
         return view('admin.office.leadcron-history', compact('cronleads'));
     }
 
-     public function assiged_employee($id)
+    public function assiged_employee($id)
     {
-      
+
 
         // $assign_lead = OfficeLeads::with('employee','folder')->where('excel_distribution_id',$id)->get();
-       
-        
-       $assign_lead = OfficeLeads::with(['employee', 'folder','excel_distribution'])
-        ->where('excel_distribution_id', $id)
-        ->select(
-            'emp_id',
-            DB::raw('COUNT(*) as lead_count'),
-            DB::raw('MIN(folder_id) as folder_id'),
-            DB::raw('MIN(service_name) as service_name'),
-            // DB::raw('MIN(assign_date) as assign_date'),
-             DB::raw('MIN(created_at) as created_at')
-            // DB::raw('MIN(status) as status')
-        )
-        ->groupBy('emp_id')
-        ->get();
+
+
+        $assign_lead = OfficeLeads::with(['employee', 'folder', 'excel_distribution'])
+            ->where('excel_distribution_id', $id)
+            ->select(
+                'emp_id',
+                DB::raw('COUNT(*) as lead_count'),
+                DB::raw('MIN(folder_id) as folder_id'),
+                DB::raw('MIN(service_name) as service_name'),
+                // DB::raw('MIN(assign_date) as assign_date'),
+                DB::raw('MIN(created_at) as created_at')
+                // DB::raw('MIN(status) as status')
+            )
+            ->groupBy('emp_id')
+            ->get();
 
 
 
@@ -492,5 +492,75 @@ class MyOfficeLeadsController extends Controller
         $excelleads = UploadedExcelRow::where('uploaded_excel_id', $id)->get();
 
         return view('admin.office.excel-leads', compact('excelleads'));
+    }
+
+
+    public function importGoogleSheet(Request $request)
+    {
+        $request->validate([
+            'sheet_url' => 'required|string'
+        ]);
+
+        // Extract Sheet ID
+        preg_match("/\/d\/(.*?)\//", $request->sheet_url, $matches);
+
+        if (!isset($matches[1])) {
+            return back()->with('error', 'Invalid Google Sheet URL');
+        }
+
+        $sheetId = $matches[1];
+
+        // Fetch Google Sheet JSON
+        $url = "https://docs.google.com/spreadsheets/d/$sheetId/gviz/tq?tqx=out:json";
+
+        $response = file_get_contents($url);
+
+        $response = str_replace("/*O_o*/\ngoogle.visualization.Query.setResponse(", "", $response);
+        $response = substr($response, 0, -2);
+
+        $json = json_decode($response, true);
+
+        $rows = $json['table']['rows'];
+
+        // 1️⃣ Create UploadedExcel entry
+        $excel = UploadedExcel::create([
+            'file_name'      => uniqid() . '_google_sheet',
+            'original_name'  => $request->sheet_url,
+            'total_rows'     => 0,
+            'total_columns'  => count($json['table']['cols']),
+            'uploaded_by'    => auth()->id(),
+            'status'         => 'pending'
+        ]);
+
+        // 2️⃣ Insert into UploadedExcelRow (same as CSV)
+        $insert = [];
+        $rowNo = 1;
+
+        foreach ($rows as $row) {
+
+            $data = [
+                "client_name"   => $row['c'][0]['v'] ?? null,
+                "client_mobile" => $row['c'][1]['v'] ?? null,
+                "client_email"  => $row['c'][2]['v'] ?? null,
+                "service_name"  => $row['c'][3]['v'] ?? null,
+            ];
+
+            $insert[] = [
+                'uploaded_excel_id' => $excel->id,
+                'excel_row_no'      => $rowNo++,
+                'raw_json'          => json_encode($data),
+                'is_assigned'       => 0,
+                'created_at'        => now(),
+                'updated_at'        => now(),
+            ];
+        }
+
+        UploadedExcelRow::insert($insert);
+
+        $excel->update([
+            'total_rows' => count($insert)
+        ]);
+
+        return redirect()->back()->with('success', 'Google Sheet Leads Imported Successfully. Ready for Distribution.');
     }
 }

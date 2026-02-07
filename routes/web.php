@@ -19,6 +19,7 @@ use App\Http\Controllers\employee\MyOfficeChatsEmployeeController;
 use App\Http\Controllers\Admin\FacebookController;
 use App\Http\Controllers\Admin\MyOfficeLeadsIntegrationController;
 use App\Http\Controllers\Admin\MyOfficeAssignIntegratedLeadsCronJobController;
+use App\Http\Controllers\Admin\GoogleSheetController;
 use App\Http\Controllers\ArtisanTerminalController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\GoogleController;
@@ -140,7 +141,6 @@ Route::middleware(['auth:admin'])->group(function () {
             Route::any('/detail/{id}', 'detail')->name('detail');
             Route::post('/update-status/{id}', 'updateStatus')->name('updateStatus');
             Route::get('/get-employee/{department}', 'departmentEmployee')->name('employee');
-
         });
 
         Route::prefix('office-task-management')->name('task_management.')->controller(MyOfficeTaskController::class)->group(function () {
@@ -151,9 +151,6 @@ Route::middleware(['auth:admin'])->group(function () {
             Route::get('/view/{id}', 'view')->name('view');
             Route::post('/task/update-status/{id}', 'updateStatus')->name('updateStatus');
             Route::get('/get-employee/{department}', 'departmentEmployee')->name('get.employee');
-
-
-            
         });
         Route::prefix('office-attendance')->name('attendance.')->controller(MyOfficeAttendanceController::class)->group(function () {
             Route::get('/', 'index')->name('index');
@@ -188,6 +185,14 @@ Route::middleware(['auth:admin'])->group(function () {
             Route::get('/lead-assiged-emp/{id}', 'assiged_employee')->name('assiged-employee');
         });
 
+
+        Route::prefix("google")->group(function () {
+
+            Route::post("/sheet/fetch-columns",[GoogleSheetController::class, "fetchColumns"])->name("google.sheet.fetchColumns");
+
+            Route::post("/sheet/connect",[GoogleSheetController::class, "connect"])->name("google.sheet.connect");
+            });
+
         // Route::post('/run-campaign/{folder}', [CampaignController::class, 'run'])
         //     ->name('campaign.run');
 
@@ -210,9 +215,9 @@ Route::middleware(['auth:admin'])->group(function () {
             Route::get('/', 'index')->name('index');
         });
 
-         Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
-                Route::get('/', 'employeeProfile')->name('profile');
-                Route::put('/update', 'profileUpdate')->name('profile.update');
+        Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
+            Route::get('/', 'employeeProfile')->name('profile');
+            Route::put('/update', 'profileUpdate')->name('profile.update');
         });
 
         Route::prefix('Ip-address')->name('ip.')->controller(AllowedIpController::class)->group(function () {
@@ -254,9 +259,9 @@ Route::middleware(['office_employee'])->group(function () {
             Route::get('/trash/{id}', 'trash')->name('trash');
             Route::post('/followup/{lead_id}', 'followup')->name('followup');
         });
-        
-        Route::get('notification/read/{id}',[NotificationController::class, 'read'])->name('notification.read');
-        Route::post('notifications/read-all',[NotificationController::class, 'readAll'])->name('notifications.readAll');
+
+        Route::get('notification/read/{id}', [NotificationController::class, 'read'])->name('notification.read');
+        Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
 
 
         Route::prefix('chats')->name('chats.')->controller(MyOfficeChatsEmployeeController::class)->group(function () {
@@ -277,17 +282,14 @@ Route::middleware(['office_employee'])->group(function () {
         Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
         Route::post('/meeting/cancel/{id}', [MeetingController::class, 'cancelMeeting'])->name('meetings.cancel');
 
-          Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
-                Route::get('/', 'employeeProfile')->name('profile');
-                Route::put('/update', 'profileUpdate')->name('profile.update');
-            });
+        Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
+            Route::get('/', 'employeeProfile')->name('profile');
+            Route::put('/update', 'profileUpdate')->name('profile.update');
+        });
 
-            Route::prefix('department')->controller(EmployeesController::class)->group(function () {
-                Route::get('/', 'index')->name('department.employee.index');
-            
-            });
-
-        
+        Route::prefix('department')->controller(EmployeesController::class)->group(function () {
+            Route::get('/', 'index')->name('department.employee.index');
+        });
     });
     // });
 });
@@ -350,5 +352,3 @@ Route::get('/meetings/create', [MeetingController::class, 'create']);
 Route::get('/google/connect', [GoogleController::class, 'redirectToGoogle'])->name('meetings.redirectToGoogle')->middleware('office_employee');
 Route::get('/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 Route::post('/meeting/schedule', [MeetingController::class, 'scheduleMeeting'])->name('meetings.store')->middleware('office_employee');
-
-
