@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-use App\Notification\LeadAssignedNotification;
+use App\Notifications\LeadAssignedNotification;
 
 class MyOfficeLeadsController extends Controller
 {
@@ -59,6 +59,14 @@ class MyOfficeLeadsController extends Controller
         $addlead->save();
 
         // $login_employee->notify(new LeadAssignedNotification($addlead));
+        $login_employee->notify(
+            new LeadAssignedNotification(
+                'single',
+                [
+                    'lead_id' => $addlead->id
+                ]
+            )
+        );
         return redirect()->back()->with('success', 'Lead Added Successfully!');
     }
     public function single_lead($id)
@@ -208,130 +216,6 @@ class MyOfficeLeadsController extends Controller
 
         return back()->with('success', 'CSV uploaded successfully. Ready for distribution.');
     }
-
-
-    // public function distributeExcel(Request $request)
-    // {
-
-    //     DB::beginTransaction();
-
-    //     try {
-
-    //         // ✅ 1. Validate request
-    //         $request->validate([
-    //             'excel_id'  => 'required|integer',
-    //             'folder_id' => 'required|integer',
-    //             'start'     => 'required|integer',
-    //             'end'       => 'required|integer|gte:start',
-    //         ]);
-
-    //         // ✅ 2. Get unassigned excel rows (range based)
-    //         $rows = UploadedExcelRow::where('uploaded_excel_id', $request->excel_id)
-    //             ->whereBetween('excel_row_no', [$request->start, $request->end])
-    //             ->where('is_assigned', 0)
-    //             ->lockForUpdate() // 🔒 avoid double assignment
-    //             ->get();
-
-
-    //         if ($rows->isEmpty()) {
-    //             DB::rollBack();
-    //             return back()->with('error', 'No rows found to assign');
-    //         }
-
-    //         // ✅ 3. Get folder
-    //         $folder = OfficeLeadsFolders::findOrFail($request->folder_id);
-
-
-    //         // ✅ 4. Decode employee IDs from emp_json
-    //         $empIds = is_array($folder->emp_json)
-    //             ? $folder->emp_json
-    //             : json_decode($folder->emp_json, true);
-
-
-
-    //         if (empty($empIds)) {
-    //             DB::rollBack();
-    //             return back()->with('error', 'No employees in folder');
-    //         }
-
-    //         // ✅ 5. Get ACTIVE + ONLINE employees only
-    //         $employees = OfficeEmployees::whereIn('id', $empIds)
-    //             ->where('status', '1')
-    //             ->where('is_online', '1')
-    //             ->get();
-
-
-    //         if ($employees->isEmpty()) {
-    //             DB::rollBack();
-    //             return back()->with('error', 'No active employees online');
-    //         }
-
-    //         // ✅ 6. Calculate workload in ONE query (performance fix)
-    //         $workloads = OfficeLeads::select('emp_id', DB::raw('COUNT(*) as pending'))
-    //             ->whereIn('emp_id', $employees->pluck('id'))
-    //             ->where('status', 'open')
-    //             ->groupBy('emp_id')
-    //             ->pluck('pending', 'emp_id');
-
-
-
-
-    //         foreach ($employees as $emp) {
-    //             $emp->pending = $workloads[$emp->id] ?? 0;
-    //         }
-
-    //         // ✅ 7. Sort by least workload
-    //         $employees = $employees->sortBy('pending')->values();
-
-    //         // ✅ 8. Assign leads (Round-Robin)
-    //         $i = 0;
-    //         $totalEmp = $employees->count();
-
-    //         foreach ($rows as $row) {
-
-    //             $lead = $row->raw_json;
-    //             $emp  = $employees[$i % $totalEmp];
-
-    //             OfficeLeads::create([
-    //                 'folder_id'     => $request->folder_id,
-    //                 'service_name'   => $lead['service_name'] ?? null,
-    //                 'client_name'   => $lead['client_name'] ?? null,
-    //                 'client_mobile' => $lead['client_mobile'] ?? null,
-    //                 'client_email'  => $lead['client_email'] ?? null,
-    //                 'status'        => 'open',
-    //                 'emp_id'        => $emp->id,
-    //                 'assign_date'   => now()->toDateString(),
-    //                 'remark'        => json_encode([
-    //                     [
-    //                         'remark' => 'Please work on this lead as soon as possible',
-    //                         'date'   => now()->format('Y-m-d'),
-    //                         'time'   => now()->format('h:i A'),
-    //                         'status' => 'open'
-    //                     ]
-    //                 ]),
-    //             ]);
-
-    //             // ✅ mark excel row assigned
-    //             $row->update(['is_assigned' => 1]);
-
-    //             $i++;
-    //         }
-
-    //         // ✅ 9. Update excel status
-    //         UploadedExcel::where('id', $request->excel_id)
-    //             ->update(['status' => 'partially_distributed']);
-
-    //         DB::commit();
-
-    //         return back()->with('success', "{$i} leads distributed successfully");
-    //     } catch (\Throwable $e) {
-
-    //         DB::rollBack();
-    //         return back()->with('error', $e->getMessage());
-    //     }
-    // }
-
-
 
 
     public function scheduleDistribution(Request $request)
