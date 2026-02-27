@@ -258,78 +258,6 @@ class MyOfficeLeadsIntegrationController extends Controller
         return response()->json(['status' => 200, response => $response]);
     }
 
-    public function facebook_webhook(Request $request)
-{
-    // ✅ VERIFY REQUEST (GET)
-    if ($request->isMethod('get')) {
-
-        $mode      = $request->get('hub_mode');
-        $token     = $request->get('hub_verify_token');
-        $challenge = $request->get('hub_challenge');
-
-        if ($mode === 'subscribe' && $token === 'meta_verify_2026') {
-            return response($challenge, 200)
-                ->header('Content-Type', 'text/plain');
-        }
-
-        return response('Verification failed', 403);
-    }
-
-    // ✅ HANDLE LEAD EVENT (POST)
-    if ($request->isMethod('post')) {
-
-        \Log::info("Facebook Webhook Event:", $request->all());
-
-        $data = $request->all();
-
-        if (!isset($data['entry'])) {
-            return response('No entry data', 200);
-        }
-
-        foreach ($data['entry'] as $entry) {
-
-            if (!isset($entry['changes'])) continue;
-
-            foreach ($entry['changes'] as $change) {
-
-                if ($change['field'] == 'leadgen') {
-
-                    $leadId = $change['value']['leadgen_id'];
-                    $pageId = $change['value']['page_id'];
-
-                    $integration = OfficeFacebookIntegrations::where('page_id', $pageId)->first();
-
-                    if (!$integration) continue;
-
-                    $accessToken = $integration->access_token;
-
-                    $client = new \GuzzleHttp\Client();
-
-                    $response = $client->get(
-                        "https://graph.facebook.com/v22.0/{$leadId}",
-                        [
-                            'query' => [
-                                'access_token' => $accessToken
-                            ]
-                        ]
-                    );
-
-                    $leadData = json_decode($response->getBody(), true);
-
-                    $new = new OfficeLeads;
-                    $new->folder_id = $integration->folder_id;
-                    $new->type = 'fb_leads';
-                    $new->csv = json_encode($leadData);
-                    $new->status = 'open';
-                    $new->assign_date = date('Y-m-d');
-                    $new->save();
-                }
-            }
-        }
-
-        return response('EVENT_RECEIVED', 200);
-    }
-}
 
     // public function facebook_webhook(Request $request)
     // {
@@ -361,30 +289,30 @@ class MyOfficeLeadsIntegrationController extends Controller
     // }
 
 
-    //    public function facebook_webhook(Request $request)
-    // {
-    //     if ($request->isMethod('get')) {
+       public function facebook_webhook(Request $request)
+    {
+        if ($request->isMethod('get')) {
 
-    //         $mode      = $request->get('hub_mode') ?? $request->get('hub.mode');
-    //         $token     = $request->get('hub_verify_token') ?? $request->get('hub.verify_token');
-    //         $challenge = $request->get('hub_challenge') ?? $request->get('hub.challenge');
+            $mode      = $request->get('hub_mode') ?? $request->get('hub.mode');
+            $token     = $request->get('hub_verify_token') ?? $request->get('hub.verify_token');
+            $challenge = $request->get('hub_challenge') ?? $request->get('hub.challenge');
 
-    //         Log::info("Mode: $mode");
-    //         Log::info("Token: $token");
-    //         Log::info("Challenge: $challenge");
+            Log::info("Mode: $mode");
+            Log::info("Token: $token");
+            Log::info("Challenge: $challenge");
 
-    //         if ($token === "meta_verify_2026") {
-    //             return response($challenge, 200);
-    //         }
+            if ($token === "meta_verify_2026") {
+                return response($challenge, 200);
+            }
 
-    //         return response("Invalid token", 403);
-    //     }
+            return response("Invalid token", 403);
+        }
 
-    //     if ($request->isMethod('post')) {
-    //         Log::info("Webhook Event Received", $request->all());
-    //         return response("EVENT_RECEIVED", 200);
-    //     }
-    // }
+        if ($request->isMethod('post')) {
+            Log::info("Webhook Event Received", $request->all());
+            return response("EVENT_RECEIVED", 200);
+        }
+    }
 
 
 
