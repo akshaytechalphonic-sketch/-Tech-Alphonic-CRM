@@ -10,6 +10,9 @@ class OfficeLeads extends Model
     use HasFactory;
 
     protected $fillable = [
+         "fb_lead_id",
+        "fb_form_id",
+        "fb_page_id",
         "excel_distribution_id",
         "emp_id",
         "assign_date",
@@ -21,6 +24,7 @@ class OfficeLeads extends Model
         "final_amount",
         "recived_amount",
         "remark",
+        "raw_data",
         "followups",
         "status",
         "old_assign",
@@ -38,11 +42,15 @@ class OfficeLeads extends Model
     {
         return $this->belongsTo(OfficeEmployees::class, 'emp_id', 'id');
     }
-    public function integration()
-    {
-        return $this->belongsTo(OfficeFacebookIntegrations::class, 'integration_id', 'id');
-    }
+    // public function integration()
+    // {
+    //     return $this->belongsTo(OfficeFacebookIntegrations::class, 'integration_id', 'id');
+    // }
 
+     public function integration()
+    {
+        return $this->belongsTo(OfficeFacebookIntegrations::class, 'fb_form_id', 'form_id');
+    }
     public function folder()
     {
         return $this->belongsTo(OfficeLeadsFolders::class,'folder_id','id');
@@ -51,4 +59,10 @@ class OfficeLeads extends Model
     public function excel_distribution(){
         return $this->belongsTo(ExcelDistribution::class,'excel_distribution_id');
     }
+
+
+
+     protected $casts = [
+        'raw_data' => 'array'
+    ];
 }
