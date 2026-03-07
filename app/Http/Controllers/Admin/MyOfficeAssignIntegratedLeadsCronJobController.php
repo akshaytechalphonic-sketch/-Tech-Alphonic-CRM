@@ -77,6 +77,7 @@ class MyOfficeAssignIntegratedLeadsCronJobController extends Controller
 
             $folder = OfficeLeadsFolders::find($fb->folder_id);
             $emp_json = json_decode($folder->emp_json, true);
+            dd($emp_json);
             $totalEmp = count($emp_json);
 
             // Last assigned employee index
