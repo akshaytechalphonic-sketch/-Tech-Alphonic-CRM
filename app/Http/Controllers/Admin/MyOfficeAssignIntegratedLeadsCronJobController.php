@@ -72,12 +72,13 @@ class MyOfficeAssignIntegratedLeadsCronJobController extends Controller
     public function facebook_leads_assign()
     {
         $fb_integrations = OfficeFacebookIntegrations::where('type', 'fb_leads')->get();
-
+       
         foreach ($fb_integrations as $fb) {
 
             $folder = OfficeLeadsFolders::find($fb->folder_id);
+           
             $emp_json = json_decode($folder->emp_json, true);
-            dd($emp_json);
+           
             $totalEmp = count($emp_json);
 
             // Last assigned employee index
