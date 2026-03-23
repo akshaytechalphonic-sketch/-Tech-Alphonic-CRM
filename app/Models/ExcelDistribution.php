@@ -15,7 +15,8 @@ class ExcelDistribution extends Model
         'start_row',
         'end_row',
         'run_at',
-        'status'
+        'status',
+        'is_auto'
     ];
 
     protected $casts = [

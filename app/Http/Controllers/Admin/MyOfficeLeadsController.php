@@ -220,29 +220,35 @@ class MyOfficeLeadsController extends Controller
 
     public function scheduleDistribution(Request $request)
     {
-        // dd($request);
         $request->validate([
             'excel_id'        => 'required|exists:uploaded_excels,id',
             'folder_id'       => 'required|array',
-            'start'           => 'required|array',
-            'end'             => 'required|array',
-            'assign_date'     => 'required|array',
-            'assign_time'     => 'required|array',
         ]);
 
-        foreach ($request->folder_id as $index => $folderId) {
+        $is_auto = $request->has('is_auto') && $request->is_auto == 1;
 
-            ExcelDistribution::create([
-                'uploaded_excel_id' => $request->excel_id,
-                'folder_id'         => $folderId,
-                'start_row'         => $request->start[$index],
-                'end_row'           => $request->end[$index],
-                'run_at'            => $request->assign_date[$index] . ' ' . $request->assign_time[$index],
-                'status'            => 'pending',
+        if (!$is_auto) {
+            $request->validate([
+                'start'           => 'required|array',
+                'end'             => 'required|array',
+                'assign_date'     => 'required|array',
+                'assign_time'     => 'required|array',
             ]);
         }
 
-        return back()->with('success', 'Multiple distributions scheduled successfully');
+        foreach ($request->folder_id as $index => $folderId) {
+            ExcelDistribution::create([
+                'uploaded_excel_id' => $request->excel_id,
+                'folder_id'         => $folderId,
+                'start_row'         => $is_auto ? 1 : $request->start[$index],
+                'end_row'           => $is_auto ? 999999999 : $request->end[$index],
+                'run_at'            => $is_auto ? now() : ($request->assign_date[$index] . ' ' . $request->assign_time[$index]),
+                'status'            => 'pending',
+                'is_auto'           => $is_auto ? 1 : 0,
+            ]);
+        }
+
+        return back()->with('success', $is_auto ? 'Auto distribution cron job activated successfully' : 'Multiple distributions scheduled successfully');
     }
 
 

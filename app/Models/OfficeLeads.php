@@ -10,7 +10,7 @@ class OfficeLeads extends Model
     use HasFactory;
 
     protected $fillable = [
-         "fb_lead_id",
+        "fb_lead_id",
         "fb_form_id",
         "fb_page_id",
         "excel_distribution_id",
@@ -33,6 +33,11 @@ class OfficeLeads extends Model
         "trash",
         "type",
         "integration_id",
+        "client_mobile2",
+        "budget",
+        "website",
+        "location",
+        "extra_column",
         "created_at",
         "updated_at",
     ];

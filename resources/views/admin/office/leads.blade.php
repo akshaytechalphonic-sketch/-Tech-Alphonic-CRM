@@ -243,6 +243,8 @@
                                         <th>Client Phone</th>
                                         <th>WhatsApp</th>
                                         <th>Client Email</th>
+                                        <th>Website</th>
+                                        <th>Budget</th>
                                         <th>Price</th>
                                         <th>Latest Remark</th>
                                         <th>Status</th>
@@ -263,7 +265,7 @@
                                             <td>{{ $lead->employee->designation->designation_name }}</td>
                                             <td>{{ $lead->service_name }}</td>
                                             <td>{{ $lead->client_name }}</td>
-                                            <td>{{ $lead->client_mobile }}</td>
+                                            <td>{{ $lead->client_mobile}}{{$lead->client_mobile2}}</td>
                                             <td class="text-center">
                                                 <a href="https://wa.me/91{{ preg_replace('/\D/', '', $lead->client_mobile) }}"
                                                     target="_blank" title="Chat on WhatsApp">
@@ -272,6 +274,8 @@
                                                 </a>
                                             </td>
                                             <td>{{ $lead->client_email }}</td>
+                                            <td>{{$lead->website }}</td>
+                                            <td>{{$lead->budget }}</td>
                                             <td>{{ number_format($lead->amount) }}</td>
                                             <td>
                                                 <span class="badge bg-primary-subtle text-dark">Time :

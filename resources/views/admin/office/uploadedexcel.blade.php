@@ -131,6 +131,7 @@
                                         <th><span class="d-none">All</span></th>
                                         <th>Sr.no.</th>
                                         <th>File Name</th>
+                                        <th>Sourse Type</th>
                                         <th>Total Rows</th>
                                         <th>Distributed Rows</th>
                                         <th>Uploaded At</th>
@@ -151,6 +152,7 @@
                                             <td></td>
                                             <td>{{ $index + 1 }}</td>
                                             <td>{{ $item->original_name }}</td>
+                                            <td>{{ $item->source_type }}</td>
                                             <td>{{ $item->total_rows }}</td>
                                             <td>{{ $assignedCount }}</td>
                                             <td>{{ $item->uploaded_at }}</td>
@@ -253,6 +255,12 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
+                                <label>Mobile Column 2</label>
+                                <select name="mapping[client_mobile2]" id="client_mobile2"
+                                        class="form-control"></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
                                 <label>Email Column</label>
                                 <select name="mapping[client_email]" id="client_email"
                                         class="form-control"></select>
@@ -261,6 +269,48 @@
                             <div class="col-md-6 mb-3">
                                 <label>Service Column</label>
                                 <select name="mapping[service_name]" id="service_name"
+                                        class="form-control"></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Budget</label>
+                                <select name="mapping[budget]" id="budget"
+                                        class="form-control"></select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label>Website URL</label>
+                                <select name="mapping[website]" id="website"
+                                        class="form-control"></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Location</label>
+                                <select name="mapping[location]" id="location"
+                                        class="form-control"></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Extra Column 1</label>
+                                <select name="mapping[extra_1]" id="extra_1"
+                                        class="form-control"></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Extra Column 2</label>
+                                <select name="mapping[extra_2]" id="extra_2"
+                                        class="form-control"></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Extra Column 3</label>
+                                <select name="mapping[extra_3]" id="extra_3"
+                                        class="form-control"></select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Extra Column 4</label>
+                                <select name="mapping[extra_4]" id="extra_4"
                                         class="form-control"></select>
                             </div>
 
@@ -411,6 +461,11 @@
 
                     <div class="modal-body">
 
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" name="is_auto" class="form-check-input" id="auto_run" value="1">
+                            <label class="form-check-label" for="auto_run">Auto Run Cron Job (Distribute All)</label>
+                        </div>
+
                         <div id="distribution-wrapper">
 
                             <!-- 🔥 DISTRIBUTION BLOCK -->
@@ -418,11 +473,11 @@
 
 
                                 <button type="button"
-                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-block"
+                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-block distribution-action-btn"
                                     onclick="removeDistributionBlock(this)">
                                     Remove
                                 </button><br>
-                                <div class="row mb-2">
+                                <div class="row mb-2 manual-distribution-fields">
                                     <div class="col">
                                         <label>Start Row</label>
                                         <input type="number" name="start[]" class="form-control start-row" required>
@@ -443,7 +498,7 @@
                                     </select>
                                 </div>
 
-                                <div class="row mb-2">
+                                <div class="row mb-2 manual-distribution-fields">
                                     <div class="col">
                                         <label>Date</label>
                                         <input type="date" name="assign_date[]" class="form-control" required>
@@ -459,7 +514,7 @@
                         </div>
 
                         <!-- ➕ ADD BUTTON -->
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addDistributionBlock()">
+                        <button type="button" id="add-more-distribution-btn" class="btn btn-sm btn-outline-primary distribution-action-btn" onclick="addDistributionBlock()">
                             ➕ Add More
                         </button>
 
@@ -506,12 +561,19 @@
                             }
 
                             let headers = data.headers;
-                            let fields = ["client_name", "client_mobile", "client_email", "service_name"];
+                            let fields = ["client_name", "client_mobile", "client_mobile2", "client_email", "service_name", "budget", "website", "location", "extra_1", "extra_2", "extra_3", "extra_4"];
 
                             fields.forEach(field => {
 
                                 let select = document.getElementById(field);
                                 select.innerHTML = "";
+
+                                // Add default empty option first
+                                let defaultOption = document.createElement("option");
+                                defaultOption.value = "";
+                                defaultOption.text = "-- Select Header --";
+                                defaultOption.selected = true;
+                                select.appendChild(defaultOption);
 
                                 headers.forEach(col => {
                                     let option = document.createElement("option");
@@ -678,6 +740,36 @@
 
                     btn.closest('.distribution-block').remove();
                 }
+
+                // Auto Run toggle logic
+                document.getElementById('auto_run').addEventListener('change', function() {
+                    let isChecked = this.checked;
+                    
+                    document.querySelectorAll('.manual-distribution-fields').forEach(el => {
+                        el.style.display = isChecked ? 'none' : 'flex';
+                    });
+                    
+                    document.querySelectorAll('.distribution-action-btn').forEach(el => {
+                        el.style.display = isChecked ? 'none' : 'inline-block';
+                    });
+
+                    // Remove required attributes from hidden manual fields so it can submit
+                    document.querySelectorAll('.manual-distribution-fields input').forEach(el => {
+                        if (isChecked) {
+                            el.removeAttribute('required');
+                        } else {
+                            el.setAttribute('required', 'required');
+                        }
+                    });
+
+                    if (isChecked) {
+                        // Keep only first block, remove others
+                        let blocks = document.querySelectorAll('.distribution-block');
+                        for (let i = 1; i < blocks.length; i++) {
+                            blocks[i].remove();
+                        }
+                    }
+                });
             </script>
 
            

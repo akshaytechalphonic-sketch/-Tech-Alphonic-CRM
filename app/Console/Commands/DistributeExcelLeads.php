@@ -19,17 +19,19 @@ class DistributeExcelLeads extends Command
 
     public function handle()
     {
+     
         $now = now()->startOfMinute();
 
         $jobs = ExcelDistribution::where('status', 'pending')
             ->where('run_at', '<=', $now)
             ->get();
 
+
         foreach ($jobs as $job) {
 
             DB::beginTransaction();
 
-            try {
+            // try {
 
                 $job->update(['status' => 'processing']);
 
@@ -49,12 +51,14 @@ class DistributeExcelLeads extends Command
                     ->where('status', '1')
                     ->where('is_online', 1)
                     ->get();
+                 
 
                 if ($employees->isEmpty()) {
                     DB::rollBack();
                     $job->update(['status' => 'pending']);
                     continue;
                 }
+               
 
                 // workload balancing
                 $workloads = OfficeLeads::select('emp_id', DB::raw('COUNT(*) as open'))
@@ -62,18 +66,29 @@ class DistributeExcelLeads extends Command
                     ->where('status', 'open')
                     ->groupBy('emp_id')
                     ->pluck('open', 'emp_id');
+                  
 
                 foreach ($employees as $emp) {
+                   
                     $emp->open = $workloads[$emp->id] ?? 0;
                 }
 
                 $employees = $employees->sortBy('open')->values();
+              
 
                 $rows = UploadedExcelRow::where('uploaded_excel_id', $job->uploaded_excel_id)
                     ->whereBetween('excel_row_no', [$job->start_row, $job->end_row])
                     ->where('is_assigned', 0)
                     ->lockForUpdate()
-                    ->get();
+                    ->get();                    
+
+                if ($rows->isEmpty()) {
+                    DB::rollBack();
+                    if (!$job->is_auto) {
+                        $job->update(['status' => 'completed']);
+                    }
+                    continue;
+                }
 
                 $assignedCounts = [];
                 $i = 0;
@@ -89,7 +104,17 @@ class DistributeExcelLeads extends Command
                         'client_name'   => $leadData['client_name'] ?? null,
                         'service_name'  => $leadData['service_name'] ?? null,
                         'client_mobile' => $leadData['client_mobile'] ?? null,
+                        'client_mobile2'=> $leadData['client_mobile2'] ?? null,
                         'client_email'  => $leadData['client_email'] ?? null,
+                        'budget'        => $leadData['budget'] ?? null,
+                        'website'       => $leadData['website'] ?? null,
+                        'location'      => $leadData['location'] ?? null,
+                        'extra_column'  => json_encode([
+                            'extra_1' => $leadData['extra_1'] ?? null,
+                            'extra_2' => $leadData['extra_2'] ?? null,
+                            'extra_3' => $leadData['extra_3'] ?? null,
+                            'extra_4' => $leadData['extra_4'] ?? null,
+                        ]),
                         'status'        => 'open',
                         'emp_id'        => $emp->id,
                         'excel_distribution_id' => $job->id,
@@ -111,7 +136,11 @@ class DistributeExcelLeads extends Command
                     $i++;
                 }
 
-                $job->update(['status' => 'completed']);
+                if ($job->is_auto) {
+                    $job->update(['status' => 'pending']);
+                } else {
+                    $job->update(['status' => 'completed']);
+                }
 
                 UploadedExcel::where('id', $job->uploaded_excel_id)
                     ->update(['status' => 'partially_distributed']);
@@ -137,17 +166,17 @@ class DistributeExcelLeads extends Command
                     }
                 }
 
-            } catch (\Throwable $e) {
+            // } catch (\Throwable $e) {
 
-                DB::rollBack();
+            //     DB::rollBack();
 
-                $job->update(['status' => 'pending']);
+            //     $job->update(['status' => 'pending']);
 
-                \Log::error('Excel Distribution Error', [
-                    'job_id' => $job->id,
-                    'error'  => $e->getMessage()
-                ]);
-            }
+            //     \Log::error('Excel Distribution Error', [
+            //         'job_id' => $job->id,
+            //         'error'  => $e->getMessage()
+            //     ]);
+            // }
         }
 
         return Command::SUCCESS;
