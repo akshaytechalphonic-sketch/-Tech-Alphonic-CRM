@@ -38,7 +38,7 @@
                         id="pills-Allclient" role="tabpanel" aria-labelledby="pills-Allclient-tab" tabindex="0">
 
                         <div class="table-responsive">
-                            <table class="example row-border order-column nowrap" style="width:100%">
+                            <table class="example row-border order-column" style="width:100%">
                                 <thead>
                                     <tr>
                                         <th> <span class="d-none">All</span></th>

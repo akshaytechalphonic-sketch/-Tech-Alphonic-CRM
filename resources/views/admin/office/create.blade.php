@@ -670,9 +670,39 @@ Password : !T8v@kL#x3$Qn9W
             <script>
                 document.getElementById('role_id').addEventListener('change', function() {
                     let managerBox = document.getElementById('manager_box');
+                    let managerDropdown = document.querySelector('select[name="manager_id"]');
 
                     if (this.value == 3 || this.value == 4) {
                         managerBox.classList.remove('d-none');
+                        
+                        // Filter dropdown options based on role
+                        Array.from(managerDropdown.options).forEach(option => {
+                            if (option.value === "") return; // Skip default option
+                            
+                            // Parse out role name from text or data attribute (we'll match the text "(Manager)" or "(Team Lead)")
+                            let text = option.textContent.toLowerCase();
+                            
+                            if (this.value == 4) { 
+                                // Team Lead: show only Managers
+                                if (text.includes('(manager)')) {
+                                    option.style.display = 'block';
+                                } else {
+                                    option.style.display = 'none';
+                                }
+                            } else if (this.value == 3) { 
+                                // Employee: show Managers and Team Leads
+                                if (text.includes('(manager)') || text.includes('(team lead)')) {
+                                    option.style.display = 'block';
+                                } else {
+                                    option.style.display = 'none';
+                                }
+                            }
+                        });
+                        
+                        // Reset selected if it is currently hidden
+                        if(managerDropdown.options[managerDropdown.selectedIndex] && managerDropdown.options[managerDropdown.selectedIndex].style.display === 'none'){
+                            managerDropdown.value = '';
+                        }
                     } else {
                         managerBox.classList.add('d-none');
                     }

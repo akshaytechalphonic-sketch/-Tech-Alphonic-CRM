@@ -699,10 +699,39 @@
 
                     let roleSelect = document.getElementById('role_id');
                     let managerBox = document.getElementById('manager_box');
+                    let managerDropdown = document.querySelector('select[name="manager_id"]');
 
                     function toggleManager(roleId) {
                         if (roleId == 3 || roleId == 4) {
                             managerBox.classList.remove('d-none');
+                            
+                            // Filter dropdown options based on role
+                            Array.from(managerDropdown.options).forEach(option => {
+                                if (option.value === "") return; // Skip default option
+                                
+                                let text = option.textContent.toLowerCase();
+                                
+                                if (roleId == 4) { 
+                                    // Team Lead: show only Managers
+                                    if (text.includes('(manager)')) {
+                                        option.style.display = 'block';
+                                    } else {
+                                        option.style.display = 'none';
+                                    }
+                                } else if (roleId == 3) { 
+                                    // Employee: show Managers and Team Leads
+                                    if (text.includes('(manager)') || text.includes('(team lead)')) {
+                                        option.style.display = 'block';
+                                    } else {
+                                        option.style.display = 'none';
+                                    }
+                                }
+                            });
+                            
+                            // Reset selected if hidden
+                            if(managerDropdown.options[managerDropdown.selectedIndex] && managerDropdown.options[managerDropdown.selectedIndex].style.display === 'none'){
+                                managerDropdown.value = '';
+                            }
                         } else {
                             managerBox.classList.add('d-none');
                         }

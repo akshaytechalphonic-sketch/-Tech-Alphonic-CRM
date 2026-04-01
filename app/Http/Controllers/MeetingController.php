@@ -3,334 +3,139 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Google\Client;
-use Google\Service\Calendar;
 use App\Models\Meeting;
-use Google\Service\Calendar\Event;
 use Illuminate\Support\Facades\Auth;
 use App\Models\OfficeEmployees;
 use Carbon\Carbon;
 use App\Models\OfficeLeads;
+use Illuminate\Support\Str;
 
 class MeetingController extends Controller
 {
-
-    // public function index(Request $request)
-    // {
-    //     $employee = auth('office_employees')->user();
-    //     $query = Meeting::with('employee', 'officelead')
-    //         ->where(function ($q) use ($employee) {
-    //             $q->where('created_by', $employee->id)
-    //                 ->orWhere('senior_id', $employee->id);
-    //         })
-    //         ->orderBy('date', 'desc');
-
-    //     if ($request->from_date) {
-    //         $query->whereDate('date', '>=', $request->from_date);
-    //     }
-
-    //     if ($request->to_date) {
-    //         $query->whereDate('date', '<=', $request->to_date);
-    //     }
-
-    //     if ($request->status) {
-    //         if ($request->status == 'completed') {
-    //             $query->whereRaw("CONCAT(date,' ',end_time) < NOW()");
-    //         } else {
-    //             $query->whereRaw("CONCAT(date,' ',end_time) >= NOW()");
-    //         }
-    //     }
-
-    //     $meetings = $query->get();
-
-
-    //     return view('meetings.index', compact('meetings'));
-    // }
-
-    //  public function index()
-    // {
-    //     $now = Carbon::now('Asia/Kolkata');
-    //     $meetings = Meeting::when(isset($_GET['employee']) && $_GET['employee'] != null, fn($q) => $q->where('created_by', $_GET['employee']))
-    //         ->when(isset($_GET['status']) && $_GET['status'] != null, fn($q) => $q->where('status', $_GET['status']))
-    //         ->when(isset($_GET['date']) && $_GET['date'] != null,  fn($q) => $q->where('date', $_GET['date']))
-    //         ->orderBy('id', 'DESC')
-    //         ->with('employee')
-    //         ->get();
-    //      $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
-    //         $query->where('department_name', 'Sales');
-    //     })->with(['designation', 'designation.department'])->get();
-    //        return view('meetings.index', compact('meetings','sales_emp'));
-    // }
-
+    /**
+     * Display a listing of the meetings.
+     */
     public function index(Request $request)
-{
-    $now = Carbon::now('Asia/Kolkata');
-    $authEmployee = Auth::guard('office_employees')->user();
+    {
+        $authEmployee = Auth::guard('office_employees')->user();
 
-    $meetings = Meeting::query()
+        $query = Meeting::with('creator', 'officelead')
+            ->when($authEmployee->role_id == 3, function ($q) use ($authEmployee) {
+                // Roles: 3 = Employee. Employees see only their own meetings.
+                $q->where('created_by', $authEmployee->id);
+            })
+            ->when(in_array($authEmployee->role_id, [2, 4]), function ($q) use ($authEmployee) {
+                // Roles: 2 = Team Lead, 4 = Manager (Assuming based on previous context).
+                // They see their own and their subordinates' meetings.
+                $subordinateIds = OfficeEmployees::where('manager_id', $authEmployee->id)->pluck('id')->toArray();
+                $q->whereIn('created_by', array_merge([$authEmployee->id], $subordinateIds));
+            })
+            // Admin (role 1) sees all by default if no when logic matches.
+            
+            ->when($request->filled('employee'), function ($q) use ($request) {
+                $q->where('created_by', $request->employee);
+            })
+            ->when($request->filled('status'), function ($q) use ($request) {
+                $q->where('status', $request->status);
+            })
+            ->when($request->filled('date'), function ($q) use ($request) {
+                $q->where('date', $request->date);
+            });
 
-        // 🔒 If role_id = 3 → only own meetings
-        ->when($authEmployee->role_id == 3, function ($q) use ($authEmployee) {
-            $q->where('created_by', $authEmployee->id);
-        })
+        $meetings = $query->orderByDesc('id')->get();
 
-        // 👨‍💼 Other roles can filter by employee
-        ->when(
-            $authEmployee->role_id != 3 && $request->filled('employee'),
-            fn($q) => $q->where('created_by', $request->employee)
-        )
+        // For filter dropdowns and create modal
+        $leads = OfficeLeads::select('id', 'client_name')->get();
+        $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
+            $query->where('department_name', 'Sales');
+        })->with(['designation', 'designation.department'])->get();
 
-        ->when($request->filled('status'),
-            fn($q) => $q->where('status', $request->status)
-        )
+        return view('meetings.index', compact('meetings', 'sales_emp', 'leads'));
+    }
 
-        ->when($request->filled('date'),
-            fn($q) => $q->where('date', $request->date)
-        )
-
-        ->orderByDesc('id')
-        ->with('employee')
-        ->get();
-
-    $sales_emp = OfficeEmployees::whereHas('designation.department', function ($query) {
-        $query->where('department_name', 'Sales');
-    })->with(['designation', 'designation.department'])->get();
-
-    return view('meetings.index', compact('meetings', 'sales_emp'));
-}
-
-
+    /**
+     * Schedule a new meeting (Simple Link Generation).
+     */
     public function scheduleMeeting(Request $request)
     {
-
-
-        $exists = Meeting::where('senior_id', $request->senior_id)
-            ->where('date', $request->date)
-            ->where(function ($q) use ($request) {
-                $q->where('start_time', '<', $request->end_time)
-                    ->where('end_time', '>', $request->start_time);
-            })->exists();
-
-        if ($exists) {
-
-            return redirect('/office-employee/leads')->with('error', 'This time is already booked');
-        }
-
-        $client_email = $request->filled('client_email') ? $request->client_email : null;
-
-        $senior_email = OfficeEmployees::where('id', $request->senior_id)->value('email');
-
-        if (!$senior_email) {
-
-            return redirect('/office-employee/leads')->with('error', 'Senior email not found');
-        }
-
-        // 2️⃣ Google Client
-        $employee = auth('office_employees')->user();
-        // dd($employee);
-        if (!$employee || !$employee->google_token) {
-
-
-            return redirect('/office-employee/leads')->with('error', 'Google account not connected');
-        }
-
-        $client = new Client();
-        $client->setClientId(config('services.google.client_id'));
-        $client->setClientSecret(config('services.google.client_secret'));
-        $client->setApplicationName('CRM Google Meet Scheduler');
-        $client->setAccessType('offline');
-
-        $client->setAccessToken(json_decode($employee->google_token, true));
-
-        // if ($client->isAccessTokenExpired()) {
-
-        //     $client->fetchAccessTokenWithRefreshToken(
-        //         $client->getRefreshToken()
-        //     );
-
-        //     $employee->update([
-        //         'google_token' => json_encode($client->getAccessToken())
-        //     ]);
-        // }
-
-
-        if ($client->isAccessTokenExpired()) {
-
-            if ($client->getRefreshToken()) {
-
-                $newToken = $client->fetchAccessTokenWithRefreshToken(
-                    $client->getRefreshToken()
-                );
-
-                $employee->update([
-                    'google_token' => json_encode(array_merge(
-                        json_decode($employee->google_token, true),
-                        $newToken
-                    ))
-                ]);
-
-                $client->setAccessToken($employee->google_token);
-            } else {
-                return redirect('/office-employee/leads')
-                    ->with('error', 'Google account reconnect required');
-            }
-        }
-
-
-
-        $service = new Calendar($client);
-
-        $startDateTime = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $request->date . ' ' . $request->start_time,
-            'Asia/Kolkata'
-        )->setTimezone('UTC');
-
-        $endDateTime = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $request->date . ' ' . $request->end_time,
-            'Asia/Kolkata'
-        )->setTimezone('UTC');
-
-        $attendees = [
-            ['email' => $senior_email], // senior always invited
-        ];
-
-        if ($client_email) {
-            $attendees[] = ['email' => $client_email]; // only if provided
-        }
-
-        // 3️⃣ Event Data
-        $event = new Event([
-            'summary' => $request->title,
-            'description' => $request->description,
-            'organizer' => [
-                'email' => $employee->email,
-                'displayName' => $employee->name,
-            ],
-            'start' => [
-                'dateTime' => $startDateTime->toRfc3339String(),
-                'timeZone' => 'UTC',
-            ],
-            'end' => [
-                'dateTime' => $endDateTime->toRfc3339String(),
-                'timeZone' => 'UTC',
-            ],
-            'conferenceData' => [
-                'createRequest' => [
-                    'requestId' => uniqid(),
-                    'conferenceSolutionKey' => [
-                        'type' => 'hangoutsMeet',
-                    ],
-                ],
-            ],
-            'attendees' => $attendees,
-
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'client_name' => 'nullable|exists:office_leads,id',
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required',
         ]);
 
+        $employee = Auth::guard('office_employees')->user();
 
-        // 5️⃣ Create Google Meet
-        try {
-            $event = $service->events->insert(
-                'primary',
-                $event,
-                [
-                    'conferenceDataVersion' => 1,
-                    'sendUpdates' => 'all',
-                ]
-            );
-        } catch (\Google\Service\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'google_error' => $e->getErrors()
-            ]);
-        }
-
-        // 5️⃣ Save in DB
         Meeting::create([
             'title' => $request->title,
-            'client_email' => $client_email,
-            'client_name' => $request->client_name,
+            'client_email' => $request->client_email,
+            'client_name' => $request->client_name, // This is lead_id
             'date' => $request->date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
-            'meet_link' => $event->getHangoutLink(),
-            'google_event_id' => $event->getId(),
-            'senior_id' => $request->senior_id,
+            'meet_link' => $request->meet_link, // Nullable
             'created_by' => $employee->id,
-            'description' => $request->description ?? null
+            'description' => $request->description,
+            'status' => 'scheduled',
+            'remarks' => [],
         ]);
 
-        return redirect('/office-employee/leads')->with('success', 'Meeting scheduled successfully')
-            ->with('meet_link', $event->getHangoutLink());
+        return redirect()->route('office_employee.meetings.index')->with('success', 'Meeting link generated successfully.');
     }
 
-
-
-    public function cancelMeeting($meetingId)
+    /**
+     * View meeting details and remarks.
+     */
+    public function view($id)
     {
-      
-        $meeting = Meeting::findOrFail($meetingId);
-       
-        $employee = auth('office_employees')->user();
+        $meeting = Meeting::with('creator', 'officelead')->findOrFail($id);
+        return view('meetings.view', compact('meeting'));
+    }
 
-        if (!$employee || !$employee->google_token) {
-           
-            return back()->with('error', 'Google account not connected');
-        }
-    
-        if (!$meeting->google_event_id) {
-            return back()->with('error', 'Google event not found');
-        }
-        
-
-        // Google Client
-        $client = new Client();
-        $client->setClientId(config('services.google.client_id'));
-        $client->setClientSecret(config('services.google.client_secret'));
-        $client->setAccessType('offline');
-        $client->setAccessToken(json_decode($employee->google_token, true));
-
-        // Refresh token if expired
-        if ($client->isAccessTokenExpired()) {
-
-            if ($client->getRefreshToken()) {
-
-                $newToken = $client->fetchAccessTokenWithRefreshToken(
-                    $client->getRefreshToken()
-                );
-
-                $employee->update([
-                    'google_token' => json_encode(array_merge(
-                        json_decode($employee->google_token, true),
-                        $newToken
-                    ))
-                ]);
-
-                $client->setAccessToken(json_decode($employee->google_token, true));
-            } else {
-                return back()->with('error', 'Google account reconnect required');
-            }
-        }
-
-        // Calendar service
-        $service = new Calendar($client);
-
-        try {
-            $service->events->delete(
-                'primary',
-                $meeting->google_event_id,
-                ['sendUpdates' => 'all'] // 📧 email cancel notification
-            );
-        } catch (\Google\Service\Exception $e) {
-            return back()->with('error', 'Google Error: ' . $e->getMessage());
-        }
-
-        // Optional: update DB
-        $meeting->update([
-            'status' => 'cancelled'
+    /**
+     * Update/Add remarks for the meeting.
+     */
+    public function updateRemarks(Request $request, $id)
+    {
+        $request->validate([
+            'remark' => 'required|string',
         ]);
 
-        return back()->with('success', 'Google meeting cancelled successfully');
+        $meeting = Meeting::findOrFail($id);
+        $authEmployee = Auth::guard('office_employees')->user();
+
+        $remarks = $meeting->remarks ?? [];
+        $remarks[] = [
+            'date' => date('Y-m-d H:i:s'),
+            'by' => $authEmployee->name,
+            'text' => $request->remark,
+        ];
+
+        $meeting->update(['remarks' => $remarks]);
+
+        return back()->with('success', 'Remark added successfully.');
+    }
+
+    /**
+     * Mark a meeting as completed.
+     */
+    public function completeMeeting($meetingId)
+    {
+        $meeting = Meeting::findOrFail($meetingId);
+        $meeting->update(['status' => 'completed']);
+        return back()->with('success', 'Meeting marked as completed successfully');
+    }
+
+    /**
+     * Cancel a meeting.
+     */
+    public function cancelMeeting($meetingId)
+    {
+        $meeting = Meeting::findOrFail($meetingId);
+        $meeting->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Meeting cancelled successfully');
     }
 }

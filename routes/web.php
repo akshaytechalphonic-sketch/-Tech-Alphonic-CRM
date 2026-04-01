@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\MyOfficeLeadsController;
 use App\Http\Controllers\employee\OfficeLoginController;
 use App\Http\Controllers\employee\OfficeDashboardController;
 use App\Http\Controllers\employee\MyOfficeLeadsEmployeeController;
+use App\Http\Controllers\employee\MyOfficeSalesReportController;
 use App\Http\Controllers\employee\MyOfficeChatsEmployeeController;
 use App\Http\Controllers\Admin\FacebookController;
 use App\Http\Controllers\Admin\MyOfficeLeadsIntegrationController;
@@ -260,6 +261,10 @@ Route::middleware(['office_employee'])->group(function () {
             Route::post('/followup/{lead_id}', 'followup')->name('followup');
         });
 
+        Route::prefix('sales-reports')->name('sales_report.')->controller(MyOfficeSalesReportController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+        });
+
         Route::get('notification/read/{id}', [NotificationController::class, 'read'])->name('notification.read');
         Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
 
@@ -279,8 +284,14 @@ Route::middleware(['office_employee'])->group(function () {
             Route::post('/task/update-status/{id}', 'updateStatus')->name('updateStatus');
             Route::get('/get-employee/{department}', 'departmentEmployee')->name('get.employee');
         });
-        Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
-        Route::post('/meeting/cancel/{id}', [MeetingController::class, 'cancelMeeting'])->name('meetings.cancel');
+        Route::prefix('meetings')->name('meetings.')->controller(MeetingController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/create', 'scheduleMeeting')->name('store');
+            Route::get('/view/{id}', 'view')->name('view');
+            Route::post('/remarks/{id}', 'updateRemarks')->name('updateRemarks');
+            Route::get('/complete/{id}', 'completeMeeting')->name('complete');
+            Route::get('/cancel/{id}', 'cancelMeeting')->name('cancel');
+        });
 
         Route::prefix('profile')->controller(EmployeeProfileController::class)->group(function () {
             Route::get('/', 'employeeProfile')->name('profile');
@@ -347,8 +358,5 @@ Route::get('/sdsdsdsd', function () {
     }
 });
 Route::any('/artisan-terminal', [ArtisanTerminalController::class, 'execute']);
-// Route::post('/meetings/store', [MeetingController::class, 'store'])->name('meetings.store');
-Route::get('/meetings/create', [MeetingController::class, 'create']);
-Route::get('/google/connect', [GoogleController::class, 'redirectToGoogle'])->name('meetings.redirectToGoogle')->middleware('office_employee');
-Route::get('/google/callback', [GoogleController::class, 'handleGoogleCallback']);
-Route::post('/meeting/schedule', [MeetingController::class, 'scheduleMeeting'])->name('meetings.store')->middleware('office_employee');
+        // Obsolete routes removed. Moved to office_employee prefix group.
+

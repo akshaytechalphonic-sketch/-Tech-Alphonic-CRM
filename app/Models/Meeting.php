@@ -8,9 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Meeting extends Model
 {
     use HasFactory;
-   
 
-    protected $fillable=[
+    protected $fillable = [
         'title',
         'client_email',
         'client_name',
@@ -18,21 +17,29 @@ class Meeting extends Model
         'start_time',
         'end_time',
         'meet_link',
-        'google_event_id',
-        'senior_id',
         'status',
         'created_by',
         'description',
+        'remarks',
     ];
 
+    protected $casts = [
+        'remarks' => 'array',
+    ];
 
-    public function employee(){
-        return $this->belongsTo(OfficeEmployees::class,'senior_id','id');
+    /**
+     * The employee who created the meeting.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(OfficeEmployees::class, 'created_by', 'id');
     }
 
+    /**
+     * The lead associated with the meeting.
+     */
     public function officelead()
-{
-    return $this->belongsTo(OfficeLeads::class, 'client_name', 'id');
-}
-
+    {
+        return $this->belongsTo(OfficeLeads::class, 'client_name', 'id');
+    }
 }

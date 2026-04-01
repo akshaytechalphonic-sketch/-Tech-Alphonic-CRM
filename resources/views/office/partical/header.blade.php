@@ -211,6 +211,16 @@
                                                 alt="" />
                                             <span class="item-name">Leads</span></a>
                                     </li>
+
+                                    @if(in_array(Auth::guard('office_employees')->user()->role_id, [1, 2, 4]))
+                                    <li class="dropdown-item-sidebar">
+                                        <a href="{{ route('office_employee.sales_report.index') }}"
+                                            class="{{ Request::is('office-employee/sales-reports*') ? 'active' : '' }}"><img
+                                                src="{{ asset('public/admin/assets/images/icons/icon5.png') }}"
+                                                alt="" />
+                                            <span class="item-name">Sales Report</span></a>
+                                    </li>
+                                    @endif
                                     <li class="dropdown-item-sidebar">
                                         <a href="{{ route('office_employee.meetings.index') }}"
                                             class="{{ Request::is('office-employee/meetings') ? 'active' : '' }}">

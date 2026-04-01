@@ -125,7 +125,7 @@
                                         <option value="{{ $items->id }}"
                                             {{ isset($_GET['employee']) ? ($_GET['employee'] == $items->id ? 'selected' : '') : '' }}>
                                             {{ $items->name }} -
-                                            ({{ $items->designation->designation_name }})
+                                            ({{ $items->role->name }})
                                         </option>
                                     @endforeach
                                 </select>
@@ -198,7 +198,7 @@
                         @php
                             $employee = auth('office_employees')->user();
                         @endphp
-                        @if (!$employee->google_token)
+                        {{-- @if (!$employee->google_token)
                             <div class="create-client-btn active d-flex">
                                 <a href="{{ route('meetings.redirectToGoogle') }}"
                                     class="d-flex align-items-center gap-2 me-2">
@@ -207,10 +207,7 @@
                                 </a>
                             </div>
                         @else
-                            {{-- <div class="create-client-btn d-flex text-success align-items-center">
-                                <i class="fa fa-check-circle me-2"></i>
-                                Google Calendar Connected
-                            </div> --}}
+                           
                             <div class="create-client-btn active d-flex">
                                 <a href="#!" class="d-flex align-items-center gap-2 me-2" data-bs-toggle="modal"
                                     data-bs-target="#meetingsScheduleModal">
@@ -220,7 +217,7 @@
                                     Schedule Meeting
                                 </a>
                             </div>
-                        @endif
+                        @endif --}}
                     @endauth
 
                 </div>
@@ -265,7 +262,7 @@
                         aria-labelledby="pills-Allclient-tab" tabindex="0">
 
                         <div class="table-responsive">
-                            <table class="example row-border order-column nowrap">
+                            <table class="example row-border order-column" style="width:100%">
                                 <thead>
                                     <tr>
                                         <th> <span class="d-none">All</span></th>
@@ -385,7 +382,7 @@
 
                 <!-- Modal Body -->
                 <div class="modal-body">
-                    <form method="POST" action="{{ route('meetings.store') }}" id="meetingForm">
+                    <form method="POST" action="{{-- route('meetings.store') --}}" id="meetingForm">
                         @csrf
 
                         <!-- Meeting Title -->

@@ -41,6 +41,7 @@ class MyOfficeLeadsEmployeeController extends Controller
     {
         
         $login_employee = Auth::guard('office_employees')->user();
+        
 
         $leads = OfficeLeads::where('trash', false)
             ->with(['employee', 'integration'])
@@ -51,13 +52,17 @@ class MyOfficeLeadsEmployeeController extends Controller
             // no restriction
         }
 
-        // DEPARTMENT HEAD (role_id = 2) → WHOLE DEPARTMENT
+        // MANAGER (role_id = 2) → OWN, THEIR TEAM LEADS, AND JUNIORS UNDER THOSE TEAM LEADS
         elseif ($login_employee->role_id == 2) {
 
-            $deptId = $login_employee->designation->department_id;
+            $teamLeadIds = OfficeEmployees::where('manager_id', $login_employee->id)->pluck('id');
 
-            $leads->whereHas('employee.designation', function ($q) use ($deptId) {
-                $q->where('department_id', $deptId);
+            $leads->where(function ($q) use ($login_employee, $teamLeadIds) {
+                $q->where('emp_id', $login_employee->id)
+                  ->orWhereIn('emp_id', $teamLeadIds)
+                  ->orWhereHas('employee', function ($qq) use ($teamLeadIds) {
+                      $qq->whereIn('manager_id', $teamLeadIds);
+                  });
             });
         }
 
@@ -99,10 +104,28 @@ class MyOfficeLeadsEmployeeController extends Controller
         // EXTRA DATA
         // =========================
 
-        $sales_emp = OfficeEmployees::whereHas('designation.department', function ($q) {
-            $q->where('department_name', 'Sales');
-        })->get();
-
+        if ($login_employee->role_id == 2) {
+            $teamLeadIds = OfficeEmployees::where('manager_id', $login_employee->id)->pluck('id');
+            $sales_emp = OfficeEmployees::with('role')
+                ->where(function ($q) use ($login_employee, $teamLeadIds) {
+                    $q->where('manager_id', $login_employee->id)
+                      ->orWhereIn('manager_id', $teamLeadIds);
+                })
+                ->whereHas('designation.department', function ($q) {
+                    $q->where('department_name', 'Sales');
+                })
+                ->get();
+        } elseif ($login_employee->role_id == 4) {
+            $sales_emp = OfficeEmployees::with('role')
+                ->where('manager_id', $login_employee->id)
+                ->whereHas('designation.department', function ($q) {
+                    $q->where('department_name', 'Sales');
+                })
+                ->get();
+        } else {
+            $sales_emp = collect();
+        }
+     
         // Seniors → Only Manager + Team Lead
         $seniors = OfficeEmployees::whereIn('role_id', [2, 4])
         ->where('id','!=','9')
@@ -198,24 +221,30 @@ class MyOfficeLeadsEmployeeController extends Controller
             $lead = $leadQuery->first();
         }
 
-        // DEPARTMENT HEAD → DEPARTMENT LEAD
+        // MANAGER (role_id = 2) → OWN, THEIR TEAM LEADS, AND JUNIORS UNDER THOSE TEAM LEADS
         elseif ($login_employee->role_id == 2) {
-            $deptId = $login_employee->designation->department_id;
+            $teamLeadIds = OfficeEmployees::where('manager_id', $login_employee->id)->pluck('id');
 
-            $lead = $leadQuery->whereHas('employee.designation', function ($q) use ($deptId) {
-                $q->where('department_id', $deptId);
+            $lead = $leadQuery->where(function ($q) use ($login_employee, $teamLeadIds) {
+                $q->where('emp_id', $login_employee->id)
+                  ->orWhereIn('emp_id', $teamLeadIds)
+                  ->orWhereHas('employee', function ($qq) use ($teamLeadIds) {
+                      $qq->whereIn('manager_id', $teamLeadIds);
+                  });
             })->first();
         }
 
-        // MANAGER → TEAM + OWN LEAD
-        elseif ($login_employee->role_id == 3) {
-            $lead = $leadQuery->whereHas('employee', function ($q) use ($login_employee) {
-                $q->where('manager_id', $login_employee->id)
-                    ->orWhere('id', $login_employee->id);
+        // TEAM LEAD (role_id = 4) → TEAM + OWN LEAD
+        elseif ($login_employee->role_id == 4) {
+            $lead = $leadQuery->where(function ($q) use ($login_employee) {
+                $q->where('emp_id', $login_employee->id)
+                    ->orWhereHas('employee', function ($qq) use ($login_employee) {
+                        $qq->where('manager_id', $login_employee->id);
+                    });
             })->first();
         }
 
-        // EMPLOYEE → OWN LEAD
+        // EMPLOYEE (role_id = 3) → OWN LEAD
         else {
             $lead = $leadQuery->where('emp_id', $login_employee->id)->first();
         }
@@ -238,7 +267,36 @@ class MyOfficeLeadsEmployeeController extends Controller
     public function update_lead_remark(Request $request, $id)
     {
         $login_employee = Auth::guard('office_employees')->user();
-        $lead = OfficeLeads::where('trash', false)->where('emp_id', $login_employee->id)->find($id);
+        
+        $leadQuery = OfficeLeads::where('trash', false)->where('id', $id);
+        
+        // Ensure they have access to this lead
+        if ($login_employee->role_id == 2) { // Manager
+            $teamLeadIds = OfficeEmployees::where('manager_id', $login_employee->id)->pluck('id');
+            $lead = (clone $leadQuery)->where(function ($q) use ($login_employee, $teamLeadIds) {
+                $q->where('emp_id', $login_employee->id)
+                  ->orWhereIn('emp_id', $teamLeadIds)
+                  ->orWhereHas('employee', function ($qq) use ($teamLeadIds) {
+                      $qq->whereIn('manager_id', $teamLeadIds);
+                  });
+            })->first();
+        } elseif ($login_employee->role_id == 4) { // Team Lead
+             $lead = (clone $leadQuery)->where(function ($q) use ($login_employee) {
+                $q->where('emp_id', $login_employee->id)
+                    ->orWhereHas('employee', function ($qq) use ($login_employee) {
+                        $qq->where('manager_id', $login_employee->id);
+                    });
+            })->first();
+        } elseif ($login_employee->role_id == 1) { // Admin
+             $lead = (clone $leadQuery)->first();
+        } else { // Employee
+             $lead = (clone $leadQuery)->where('emp_id', $login_employee->id)->first();
+        }
+
+        if (!$lead) {
+            return redirect()->back()->with('error', 'You are not authorized to update this lead.');
+        }
+
         $lead->status = $request->status;
 
         $old_remark = json_decode($lead->remark, true);
@@ -282,8 +340,8 @@ class MyOfficeLeadsEmployeeController extends Controller
                 $createMonth->update();
             }
         }
-            return redirect()->route('office_employee.leads.index')->with('succuss', 'Remarks updated Succesfully.');
-        // return redirect()->back();
+            // return redirect()->route('office_employee.leads.index')->with('succuss', 'Remarks updated Succesfully.');
+        return redirect()->back();
     }
 
     public function create_folder(Request $request)
@@ -346,17 +404,21 @@ class MyOfficeLeadsEmployeeController extends Controller
             // no restriction
         }
 
-        // DEPARTMENT HEAD → WHOLE DEPARTMENT
+        // MANAGER (role_id = 2) → OWN, THEIR TEAM LEADS, AND JUNIORS UNDER THOSE TEAM LEADS
         elseif ($login_employee->role_id == 2) {
 
-            $deptId = $login_employee->designation->department_id;
+            $teamLeadIds = OfficeEmployees::where('manager_id', $login_employee->id)->pluck('id');
 
-            $leads->whereHas('employee.designation', function ($q) use ($deptId) {
-                $q->where('department_id', $deptId);
+            $leads->where(function ($q) use ($login_employee, $teamLeadIds) {
+                $q->where('emp_id', $login_employee->id)
+                  ->orWhereIn('emp_id', $teamLeadIds)
+                  ->orWhereHas('employee', function ($qq) use ($teamLeadIds) {
+                      $qq->whereIn('manager_id', $teamLeadIds);
+                  });
             });
         }
 
-        // TEAM LEAD → OWN + JUNIORS
+        // TEAM LEAD (role_id = 4) → OWN + JUNIORS
         elseif ($login_employee->role_id == 4) {
 
             $leads->where(function ($q) use ($login_employee) {
