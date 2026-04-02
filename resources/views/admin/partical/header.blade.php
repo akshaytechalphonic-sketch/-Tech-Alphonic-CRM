@@ -184,14 +184,14 @@
                                             <span class="item-name">Leads</span>
                                         </a>
                                     </li>
-                                    <li class="dropdown-item-sidebar">
+                                    {{-- <li class="dropdown-item-sidebar">
                                         <a href="{{route('admin.office.meetings')}}"
                                             class="{{ Request::is('admin/office/meetings') ? 'active' : '' }}">
                                             <img src="{{ asset('public/admin/assets/images/icons/date-time.png')}}"
                                                 alt="">
                                             <span class="item-name">Meetings</span>
                                         </a>
-                                    </li>
+                                    </li> --}}
 
                                     <li class="dropdown-item-sidebar">
                                         <a href="{{ route('admin.leads_integration.index') }}"
